@@ -51,7 +51,7 @@ export default function MyResults() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-white hover:text-white hover:text-red-500 hover:bg-red-500/10 font-bold" onClick={() => { localStorage.clear(); navigate("/"); }}>
+            <Button variant="ghost" size="sm" className="text-white hover:text-white hover:text-red-500 hover:bg-red-500/10 font-bold" onClick={() => { localStorage.clear(); navigate("/login"); }}>
               <LogOut className="w-4 h-4 mr-1" /> Logout
             </Button>
           </div>

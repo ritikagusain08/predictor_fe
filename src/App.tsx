@@ -1,5 +1,5 @@
 // App.tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import MatchPrediction from "./pages/MatchPrediction";
@@ -24,7 +24,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<RoleSelection />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/select-role" element={<RoleSelection />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

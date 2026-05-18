@@ -592,7 +592,7 @@ export default function AdminDashboard() {
           <Button
             variant="ghost"
             className="w-full justify-start text-neutral-400 hover:text-red-500 hover:bg-red-500/10 font-bold"
-            onClick={() => { localStorage.clear(); navigate("/"); }}
+            onClick={() => { localStorage.clear(); navigate("/login"); }}
           >
             <LogOut className="w-4 h-4 mr-2" /> Logout
           </Button>
