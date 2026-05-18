@@ -76,7 +76,7 @@ export default function Dashboard() {
     const fetchMatches = async () => {
       try {
         const { data } = await api.get<Match[]>("/admin/api/matches/allmatches");
-        const activeMatches = data.filter((m) => Number(m.status) === 1 || Number(m.status) === 2);
+        const activeMatches = data.filter((m) => Number(m.status) === 1 || Number(m.status) === 2 || Number(m.status) === 3);
         setMatches(activeMatches);
 
         if (userId) {
@@ -86,17 +86,15 @@ export default function Dashboard() {
           for (const match of activeMatches) {
             try {
               // 1. Check Prediction Status
-              const { data: predData } = await api.get(`/api/predictions/get/${userId}/${match.matchId}`);
+              const { data: predData } = await api.get(`/api/predictions/get/${match.matchId}`);
               statusMap[match.matchId] = predData.predictions && predData.predictions.length > 0;
               
               // 2. Check Question Availability
               try {
-                const { data: qData } = await api.get<any[]>(`/api/questions/${match.matchId}`);
+                const { data: qData } = await api.get<any[]>(`/admin/api/questions/${match.matchId}`);
                 questionMap[match.matchId] = Array.isArray(qData) && qData.length > 0;
               } catch (qErr) {
-                // Fallback to admin endpoint
-                const { data: adminQData } = await api.get<any[]>(`/admin/api/questions/${match.matchId}`);
-                questionMap[match.matchId] = Array.isArray(adminQData) && adminQData.length > 0;
+                questionMap[match.matchId] = false;
               }
             } catch (pErr) {
               console.error(`Status check failed for match ${match.matchId}`, pErr);
@@ -245,7 +243,7 @@ export default function Dashboard() {
                   <CheckCircle2 className="w-10 h-10 text-white" />
                </div>
                <h2 className="text-2xl font-black italic uppercase relative z-10 leading-none">League Ready!</h2>
-               <p className="text-white/80 font-bold italic uppercase tracking-widest text-[9px] relative z-10">Paddock initialized and online</p>
+               <p className="text-white/80 font-bold italic uppercase tracking-widest text-[9px] relative z-10">Dashboard Ready</p>
             </div>
 
             {/* Content */}
@@ -262,9 +260,9 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-2">
-                     <Label className="text-[9px] font-black uppercase tracking-widest text-neutral-600">Direct Link</Label>
+                     <Label className="text-[9px] font-black uppercase tracking-widest text-white hover:text-white">Direct Link</Label>
                      <div className="bg-neutral-950 border border-white/5 p-4 rounded-xl flex items-center justify-between gap-3">
-                        <span className="text-[10px] font-bold text-neutral-500 truncate italic">{shareLink}</span>
+                        <span className="text-[10px] font-bold text-white hover:text-white truncate italic">{shareLink}</span>
                         <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest text-[9px] h-8 px-4 shrink-0 rounded-lg" onClick={handleCopyLink}>
                            {copied ? "Copied" : "Copy"}
                         </Button>
@@ -276,7 +274,7 @@ export default function Dashboard() {
                <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-3">
                      <Separator className="flex-1 bg-white/5" />
-                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-600">Share with racers</span>
+                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white hover:text-white">Share with racers</span>
                      <Separator className="flex-1 bg-white/5" />
                   </div>
                   <div className="flex justify-center gap-4">
@@ -296,7 +294,7 @@ export default function Dashboard() {
                <div className="grid grid-cols-2 gap-4 pt-4">
                   <Button 
                     variant="outline" 
-                    className="border-white/10 hover:bg-neutral-800 text-neutral-500 font-black uppercase italic tracking-widest h-12 rounded-xl text-[9px]" 
+                    className="border-white/10 hover:bg-neutral-800 text-white hover:text-white font-black uppercase italic tracking-widest h-12 rounded-xl text-[9px]" 
                     onClick={() => { setShowSuccessOverlay(false); navigate("/dashboard"); }}
                   >
                      <LayoutDashboard className="w-3 h-3 mr-2" /> Home Page
@@ -331,7 +329,7 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 font-bold" onClick={() => { localStorage.clear(); navigate("/"); }}>
+            <Button variant="ghost" size="sm" className="text-white hover:text-white hover:text-red-500 hover:bg-red-500/10 font-bold" onClick={() => { localStorage.clear(); navigate("/"); }}>
               <LogOut className="w-4 h-4 mr-1" /> Logout
             </Button>
           </div>
@@ -381,13 +379,23 @@ export default function Dashboard() {
 
                     <div className={cn(
                        "flex items-center gap-2 px-6 py-3 rounded-full border-2 font-black uppercase italic tracking-widest text-sm shadow-xl skew-x-[-10deg]",
-                       Number(m.status) === 1 
+                       Number(m.status) === 1 && hasQuestionsStatus[m.matchId]
                         ? "bg-green-500/10 border-green-500 text-green-500 shadow-green-500/20 animate-pulse" 
+                        : (!hasQuestionsStatus[m.matchId] || Number(m.status) === 0)
+                        ? "bg-yellow-500/10 border-yellow-500 text-yellow-500 shadow-yellow-500/20"
                         : "bg-red-500/10 border-red-500 text-red-500 shadow-red-500/20"
                     )}>
                        <div className="skew-x-[10deg] flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-current shadow-[0_0_10px_currentColor]" />
-                          {Number(m.status) === 1 ? "Open" : "Closed"}
+                          {Number(m.status) === 1 && hasQuestionsStatus[m.matchId]
+                            ? "Open"
+                            : (!hasQuestionsStatus[m.matchId] || Number(m.status) === 0)
+                            ? "Coming Soon"
+                            : Number(m.status) === 2
+                            ? "Locked"
+                            : Number(m.status) === 3
+                            ? "Calculating"
+                            : "Closed"}
                        </div>
                     </div>
                   </div>
@@ -411,19 +419,19 @@ export default function Dashboard() {
 
                     {hasQuestionsStatus[m.matchId] && (
                       <Button 
-                        className={`min-w-[240px] font-black uppercase italic tracking-tighter h-16 text-2xl transition-all shadow-2xl rounded-none border-b-4 skew-x-[-10deg] ${predictionStatus[m.matchId] ? "bg-neutral-800 border-neutral-700 text-neutral-500" : "bg-red-600 border-red-800 hover:bg-red-700 hover:border-red-900 text-white shadow-red-600/30"}`}
-                        disabled={Number(m.status) === 2}
+                        className="min-w-[240px] font-black uppercase italic tracking-tighter h-16 text-2xl transition-all shadow-2xl rounded-none border-b-4 skew-x-[-10deg] bg-red-600 border-red-800 hover:bg-red-700 hover:border-red-900 text-white shadow-red-600/30"
+                        disabled={Number(m.status) >= 2}
                         onClick={() => navigate("/predict", { state: { match: m, isEdit: predictionStatus[m.matchId] } })}
                       >
                         <div className="skew-x-[10deg] flex items-center">
-                           {predictionStatus[m.matchId] ? "Edit Picks" : "Predict Now"}
+                           {Number(m.status) === 3 ? "Points Calculating" : Number(m.status) === 2 ? "Prediction Locked" : predictionStatus[m.matchId] ? "Edit Prediction" : "Predict Now"}
                            <ChevronRight className="w-8 h-8 ml-1 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </Button>
                     )}
                     {!hasQuestionsStatus[m.matchId] && (
                       <div className="min-w-[240px] h-16 border border-white/5 bg-neutral-950/50 flex items-center justify-center skew-x-[-10deg]">
-                         <span className="skew-x-[10deg] text-[10px] font-black uppercase italic text-neutral-600 tracking-widest">Coming Soon</span>
+                         <span className="skew-x-[10deg] text-[10px] font-black uppercase italic text-white hover:text-white tracking-widest">Coming Soon</span>
                       </div>
                     )}
                   </div>
@@ -445,7 +453,7 @@ export default function Dashboard() {
                 <div className="w-1.5 h-8 bg-red-600 rounded-full" />
                 <h2 className="text-3xl font-black uppercase italic tracking-tighter">Your Leagues</h2>
               </div>
-              <p className="text-neutral-500 font-medium max-w-sm italic text-base text-white/60">Challenge your friends in private leagues.</p>
+              <p className="text-white hover:text-white font-medium max-w-sm italic text-base text-white/60">Challenge your friends in private leagues.</p>
               <Button 
                 variant="link" 
                 onClick={() => navigate("/leagues")}
@@ -485,8 +493,8 @@ export default function Dashboard() {
                               leagueType === "1" ? "border-red-600 bg-red-600/5" : "border-neutral-800 hover:bg-neutral-900"
                             )}
                           >
-                             <Lock className={cn("mb-2 h-5 w-5", leagueType === "1" ? "text-red-600" : "text-neutral-600")} />
-                             <span className={cn("font-black italic uppercase text-[10px]", leagueType === "1" ? "text-white" : "text-neutral-500")}>Private</span>
+                             <Lock className={cn("mb-2 h-5 w-5", leagueType === "1" ? "text-red-600" : "text-white hover:text-white")} />
+                             <span className={cn("font-black italic uppercase text-[10px]", leagueType === "1" ? "text-white" : "text-white hover:text-white")}>Private</span>
                              <RadioGroupItem value="1" className="sr-only" />
                           </div>
                           <div 
@@ -537,7 +545,7 @@ export default function Dashboard() {
                 <DialogContent className="bg-neutral-900 border-neutral-800 text-white p-6 rounded-[2rem] max-w-xl max-h-[85vh] overflow-hidden flex flex-col">
                   <DialogHeader className="mb-4">
                     <DialogTitle className="text-2xl font-black italic uppercase text-center">Join Center</DialogTitle>
-                    <DialogDescription className="text-neutral-500 font-medium italic text-center text-[10px]">Browse public groups or enter a code.</DialogDescription>
+                    <DialogDescription className="text-white hover:text-white font-medium italic text-center text-[10px]">Browse public groups or enter a code.</DialogDescription>
                   </DialogHeader>
                   
                   <Tabs defaultValue="browse" className="w-full flex-1 flex flex-col overflow-hidden">
@@ -548,7 +556,7 @@ export default function Dashboard() {
 
                     <TabsContent value="browse" className="flex-1 overflow-y-auto pr-2 mt-0 space-y-3">
                        {loadingUnjoined ? (
-                         <div className="py-12 text-center animate-pulse text-neutral-600 font-bold italic uppercase tracking-widest text-[10px]">Looking for leagues...</div>
+                         <div className="py-12 text-center animate-pulse text-white hover:text-white font-bold italic uppercase tracking-widest text-[10px]">Looking for leagues...</div>
                        ) : unjoinedLeagues.length > 0 ? (
                          unjoinedLeagues.map((l) => (
                            <div key={l.id} className="p-4 bg-neutral-950 border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-red-600/50 transition-all">
@@ -596,7 +604,7 @@ export default function Dashboard() {
                              onClick={handleJoinByCode} 
                              className="bg-red-600 hover:bg-red-700 w-full h-14 font-black uppercase italic tracking-widest text-white shadow-xl shadow-red-600/10 text-base rounded-lg mt-2"
                           >
-                             Join Paddock
+                             Join League
                           </Button>
                        </div>
                     </TabsContent>
@@ -619,7 +627,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <div className="font-black italic uppercase tracking-tight text-xl group-hover:text-red-500 transition-colors">{l.leagueName}</div>
-                    <div className="text-[9px] text-neutral-600 font-bold flex items-center gap-2 mt-1 uppercase tracking-widest italic">
+                    <div className="text-[9px] text-white hover:text-white font-bold flex items-center gap-2 mt-1 uppercase tracking-widest italic">
                       <Users className="w-3 h-3" />
                       <span>{l.membersCount} Members</span>
                       <span>•</span>

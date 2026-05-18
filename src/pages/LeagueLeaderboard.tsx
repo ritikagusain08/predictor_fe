@@ -109,7 +109,8 @@ export default function LeagueLeaderboard() {
     try {
       await fetchLeagueInfo();
       const matchesRes = await api.get<Match[]>("/admin/api/matches/allmatches");
-      const sortedMatches = (matchesRes.data || []).sort((a, b) => b.gamedayId - a.gamedayId);
+      const completedMatches = (matchesRes.data || []).filter(m => Number(m.status) === 4);
+      const sortedMatches = completedMatches.sort((a, b) => a.gamedayId - b.gamedayId);
       setMatches(sortedMatches);
     } catch (err) {
       console.error("Error fetching initial data:", err);
@@ -205,13 +206,13 @@ export default function LeagueLeaderboard() {
 
   const currentMember = leagueInfo?.members?.find(m => m.userId === currentUserId);
   const isAdmin = currentMember?.isAdmin || false;
-  const isHost = leagueInfo && String((leagueInfo as any).userId) === currentUserId;
+  const isHost = leagueInfo ? (String((leagueInfo as any).userId) === currentUserId || isAdmin) : false;
   
   // Configurable permissions based on template
   const canRename = (isAdmin || isHost) && (leagueInfo?.template?.allowRenaming !== false);
   const canRemoveMember = (isAdmin || isHost) && (leagueInfo?.template?.allowMemberRemoval !== false);
   const canDeleteLeague = (isAdmin || isHost) && (leagueInfo?.template?.allowAdminDelete !== false);
-  const canLeave = !isHost && (leagueInfo?.template?.allowUserLeave !== false);
+  const canLeave = !isHost && (leagueInfo?.template?.allowUserLeave !== false) && Boolean(leagueInfo?.template?.name?.toUpperCase().includes("PRIVATE"));
 
   const getRankStyle = (index: number) => {
     if (index === 0) return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]";
@@ -245,7 +246,7 @@ export default function LeagueLeaderboard() {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 font-bold group" 
+            className="text-white hover:text-white hover:text-red-500 hover:bg-red-500/10 font-bold group" 
             onClick={() => navigate("/leagues")}
           >
             <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
@@ -281,7 +282,7 @@ export default function LeagueLeaderboard() {
                     <Button size="icon" className="bg-green-600 hover:bg-green-700 h-12 w-12" onClick={handleUpdateName} disabled={isUpdating}>
                        {isUpdating ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check className="w-5 h-5" />}
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-12 w-12 text-neutral-500" onClick={() => { setIsEditingName(false); setNewLeagueName(leagueInfo?.leagueName || ""); }}>
+                    <Button size="icon" variant="ghost" className="h-12 w-12 text-white hover:text-white" onClick={() => { setIsEditingName(false); setNewLeagueName(leagueInfo?.leagueName || ""); }}>
                        <Trash2 className="w-5 h-5" />
                     </Button>
                   </div>
@@ -289,14 +290,14 @@ export default function LeagueLeaderboard() {
                   <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white leading-none flex items-center gap-4">
                     {leagueInfo?.leagueName || "League Standings"}
                     {canRename && (
-                      <Button variant="ghost" size="icon" className="h-10 w-10 text-neutral-600 hover:text-white" onClick={() => setIsEditingName(true)}>
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-white hover:text-white hover:text-white" onClick={() => setIsEditingName(true)}>
                         <Edit3 className="w-5 h-5" />
                       </Button>
                     )}
                   </h1>
                 )}
               </div>
-              <div className="flex items-center gap-4 text-neutral-500 font-bold uppercase tracking-widest italic text-[10px]">
+              <div className="flex items-center gap-4 text-white hover:text-white font-bold uppercase tracking-widest italic text-[10px]">
                 <span className="flex items-center gap-1.5">
                    <Users className="w-3.5 h-3.5 text-red-600" />
                    <span className="text-neutral-300">{leagueInfo?.membersCount || 0}</span> Racers
@@ -331,7 +332,7 @@ export default function LeagueLeaderboard() {
           <TabsContent value="leaderboard" className="space-y-6">
             <div className="flex justify-end">
               <div className="w-full md:w-64 space-y-2">
-                 <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 italic ml-1">Rankings View</Label>
+                 <Label className="text-[10px] font-black uppercase tracking-widest text-white hover:text-white italic ml-1">Rankings View</Label>
                  <Select value={selectedMatchId} onValueChange={setSelectedMatchId}>
                     <SelectTrigger className="bg-neutral-900 border-white/5 h-14 rounded-xl text-neutral-200 font-bold italic">
                        <SelectValue placeholder="Select View" />
@@ -360,7 +361,7 @@ export default function LeagueLeaderboard() {
                   <TableHeader className="bg-neutral-950/40 border-b border-white/5">
                     <TableRow className="border-none hover:bg-transparent">
                       <TableHead className="w-24 pl-8 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic">Pos</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic pl-12">Pilot</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic pl-12">Player</TableHead>
                       <TableHead className="text-right pr-8 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic">Pts</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -418,10 +419,10 @@ export default function LeagueLeaderboard() {
               <Card className="bg-neutral-900/40 border border-white/5 rounded-[2.5rem] overflow-hidden">
                 <CardHeader className="bg-neutral-950/40 p-8 border-b border-white/5 flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl font-black uppercase italic tracking-tighter mb-1">Pilot Roster</CardTitle>
-                    <p className="text-[10px] font-bold text-neutral-600 uppercase italic tracking-widest">Active competitors in this league</p>
+                    <CardTitle className="text-xl font-black uppercase italic tracking-tighter mb-1">Player Roster</CardTitle>
+                    <p className="text-[10px] font-bold text-white hover:text-white uppercase italic tracking-widest">Active competitors in this league</p>
                   </div>
-                  <Badge variant="outline" className="border-neutral-800 text-neutral-500 text-[10px] font-black uppercase">{leagueInfo?.members?.length || 0} Pilots</Badge>
+                  <Badge variant="outline" className="border-neutral-800 text-neutral-500 text-[10px] font-black uppercase">{leagueInfo?.members?.length || 0} Players</Badge>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y divide-white/5">
@@ -446,7 +447,7 @@ export default function LeagueLeaderboard() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-10 w-10 text-neutral-600 hover:text-red-500 hover:bg-red-500/10"
+                              className="h-10 w-10 text-white hover:text-white hover:text-red-500 hover:bg-red-500/10"
                               onClick={() => handleRemoveMember(member.userId)}
                             >
                               <UserMinus className="w-5 h-5" />
@@ -490,7 +491,7 @@ export default function LeagueLeaderboard() {
               {canDeleteLeague && (
                 <div className="p-8 bg-red-600/5 border border-red-600/10 rounded-[2.5rem] space-y-6">
                    <h3 className="text-[10px] font-black uppercase tracking-widest text-red-500 italic">Authority Actions</h3>
-                   <p className="text-[10px] text-neutral-500 font-medium italic leading-relaxed">As the League Host, you have full control over the league settings and members.</p>
+                   <p className="text-[10px] text-white hover:text-white font-medium italic leading-relaxed">As the League Host, you have full control over the league settings and members.</p>
                    <Button 
                     variant="outline" 
                     className="w-full border-red-600/50 text-red-500 hover:bg-red-600 hover:text-white h-12 rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-red-600/5"

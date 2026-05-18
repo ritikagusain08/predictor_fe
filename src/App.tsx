@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Leagues from "./pages/Leagues";
 import LeagueDetails from "./pages/LeagueDetails";
 import MyResults from "./pages/MyResults";
+import MatchResultDetails from "./pages/MatchResultDetails";
 import LeagueLeaderboard from "./pages/LeagueLeaderboard";
 
 const token = localStorage.getItem("token");
@@ -29,6 +30,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/my-results" element={<MyResults />} />
+        <Route path="/match-results/:matchId" element={<MatchResultDetails />} />
         <Route path="/predict" element={<MatchPrediction />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/leagues" element={<Leagues />} />

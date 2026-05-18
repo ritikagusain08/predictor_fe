@@ -99,7 +99,7 @@ export default function Login() {
                   <button type="button" className="text-xs text-red-500 hover:underline">Forgot?</button>
                 </div>
                 <div className="relative group">
-                  <Lock className="absolute left-3 top-3 w-4 h-4 text-neutral-500 group-focus-within:text-red-500 transition-colors" />
+                  <Lock className="absolute left-3 top-3 w-4 h-4 text-white hover:text-white group-focus-within:text-red-500 transition-colors" />
                   <Input 
                     id="password"
                     type="password" 
@@ -120,7 +120,7 @@ export default function Login() {
               >
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
-              <div className="text-sm text-neutral-500 text-center">
+              <div className="text-sm text-white hover:text-white text-center">
                 New to the game?{" "}
                 <Link to="/register" className="text-red-500 hover:text-red-400 underline transition-colors">Create an account</Link>
               </div>

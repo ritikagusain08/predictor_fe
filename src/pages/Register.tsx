@@ -131,7 +131,7 @@ export default function Register() {
                 >
                   {loading ? "Creating account..." : "Create Account"}
                 </Button>
-                <div className="text-sm text-neutral-500 text-center font-bold">
+                <div className="text-sm text-white hover:text-white text-center font-bold">
                   Already have an account?{" "}
                   <Link to="/" className="text-red-500 hover:text-red-400 underline transition-colors">Login here</Link>
                 </div>

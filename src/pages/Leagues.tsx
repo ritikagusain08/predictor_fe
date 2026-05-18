@@ -172,7 +172,7 @@ export default function Leagues() {
     const fetchMatches = async () => {
       try {
         const { data } = await api.get<Match[]>("/admin/api/matches/allmatches");
-        const activeMatches = data.filter((m) => Number(m.status) === 1 || Number(m.status) === 2);
+        const activeMatches = data.filter((m) => Number(m.status) === 1 || Number(m.status) === 2 || Number(m.status) === 3);
         setMatches(activeMatches);
       } catch (err) {
         console.error("Error fetching matches", err);
@@ -193,6 +193,12 @@ export default function Leagues() {
       setLoadingUnjoined(false);
     }
   };
+
+  useEffect(() => {
+    if (showJoinCenter) {
+      fetchUnjoinedLeagues();
+    }
+  }, [showJoinCenter]);
 
   const handleJoinByCode = async () => {
     if (!trimmedJoinCode || !userId) return;
@@ -319,9 +325,9 @@ export default function Leagues() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-neutral-600">Direct Link</Label>
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-white hover:text-white">Direct Link</Label>
                   <div className="bg-neutral-950 border border-white/5 p-4 rounded-xl flex items-center justify-between gap-3">
-                    <span className="text-[10px] font-bold text-neutral-500 truncate italic">{shareLink}</span>
+                    <span className="text-[10px] font-bold text-white hover:text-white truncate italic">{shareLink}</span>
                     <Button
                       size="sm"
                       type="button"
@@ -337,7 +343,7 @@ export default function Leagues() {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-3">
                   <Separator className="flex-1 bg-white/5" />
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-600">Share with racers</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white hover:text-white">Share with racers</span>
                   <Separator className="flex-1 bg-white/5" />
                 </div>
                 <div className="flex justify-center gap-4">
@@ -372,7 +378,7 @@ export default function Leagues() {
                 <Button
                   variant="outline"
                   type="button"
-                  className="border-white/10 hover:bg-neutral-800 text-neutral-500 font-black uppercase italic tracking-widest h-12 rounded-xl text-[9px]"
+                  className="border-white/10 hover:bg-neutral-800 text-white hover:text-white font-black uppercase italic tracking-widest h-12 rounded-xl text-[9px]"
                   onClick={() => {
                     setShowSuccessOverlay(false);
                     navigate("/dashboard");
@@ -409,10 +415,10 @@ export default function Leagues() {
 
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex flex-col items-end leading-tight">
-              <div className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.3em] italic">Player </div>
+              <div className="text-[10px] text-white hover:text-white font-black uppercase tracking-[0.3em] italic">Player </div>
               <div className="text-sm font-bold text-neutral-200 italic">{username}</div>
             </div>
-            <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 font-bold" onClick={() => navigate("/dashboard")}>
+            <Button variant="ghost" size="sm" className="text-white hover:text-white hover:text-red-500 hover:bg-red-500/10 font-bold" onClick={() => navigate("/dashboard")}>
               <ChevronLeft className="w-4 h-4 mr-1" />
               Back
             </Button>
@@ -576,7 +582,7 @@ export default function Leagues() {
                           </div>
                           <ChevronRight className="w-6 h-6 text-neutral-800 group-hover:text-red-600 group-hover:translate-x-1 transition-all shrink-0" />
                         </div>
-                        <div className="skew-x-[5deg] flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-neutral-600 font-bold uppercase tracking-widest italic">
+                        <div className="skew-x-[5deg] flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-white hover:text-white font-bold uppercase tracking-widest italic">
                           <span className="flex items-center gap-1">
                             <Users className="w-3 h-3" />
                             {league.membersCount} members
@@ -700,7 +706,7 @@ export default function Leagues() {
         <DialogContent className="bg-neutral-900 border-neutral-800 text-white p-6 rounded-[2rem] max-w-xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader className="mb-4">
             <DialogTitle className="text-2xl font-black italic uppercase text-center">Join Center</DialogTitle>
-            <DialogDescription className="text-neutral-500 font-medium italic text-center text-[10px]">Browse public groups or enter a code.</DialogDescription>
+            <DialogDescription className="text-white hover:text-white font-medium italic text-center text-[10px]">Browse public groups or enter a code.</DialogDescription>
           </DialogHeader>
 
           <Tabs defaultValue="browse" className="w-full flex-1 flex flex-col overflow-hidden">
@@ -721,7 +727,7 @@ export default function Leagues() {
 
             <TabsContent value="browse" className="flex-1 overflow-y-auto pr-2 mt-0 space-y-3">
               {loadingUnjoined ? (
-                <div className="py-12 text-center animate-pulse text-neutral-600 font-bold italic uppercase tracking-widest text-[10px]">Looking for leagues...</div>
+                <div className="py-12 text-center animate-pulse text-white hover:text-white font-bold italic uppercase tracking-widest text-[10px]">Looking for leagues...</div>
               ) : unjoinedLeagues.length > 0 ? (
                 unjoinedLeagues.map((l) => (
                   <div

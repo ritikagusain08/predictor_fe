@@ -114,7 +114,7 @@ export default function LeagueDetails() {
       {/* 🔹 HEADER */}
       <nav className="w-full border-b border-neutral-800 bg-neutral-950 h-16 flex items-center px-4 mb-8">
         <div className="max-w-4xl mx-auto w-full flex items-center justify-between">
-          <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-white" onClick={() => navigate("/leagues")}>
+          <Button variant="ghost" size="sm" className="text-white hover:text-white hover:text-white" onClick={() => navigate("/leagues")}>
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back
           </Button>
@@ -123,10 +123,10 @@ export default function LeagueDetails() {
              <span className="font-black italic uppercase text-xs tracking-widest">League Arena</span>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-white" onClick={() => setShowShare(true)}>
+            <Button variant="ghost" size="icon" className="text-white hover:text-white hover:text-white" onClick={() => setShowShare(true)}>
               <Share2 className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-white" onClick={() => setShowSettings(true)}>
+            <Button variant="ghost" size="icon" className="text-white hover:text-white hover:text-white" onClick={() => setShowSettings(true)}>
               <Settings className="w-4 h-4" />
             </Button>
           </div>
@@ -148,7 +148,7 @@ export default function LeagueDetails() {
               <div className="flex items-center gap-2 pr-4 border-r border-neutral-800">
                  <Users className="w-5 h-5 text-neutral-500" />
                  <div>
-                    <div className="text-[10px] font-black uppercase text-neutral-600">Pilots</div>
+                    <div className="text-[10px] font-black uppercase text-white hover:text-white">Players</div>
                     <div className="text-lg font-bold leading-none">{league.membersCount}</div>
                  </div>
               </div>
@@ -173,7 +173,7 @@ export default function LeagueDetails() {
             <Table>
               <TableHeader className="bg-neutral-950/50">
                 <TableRow className="border-neutral-800 hover:bg-transparent">
-                  <TableHead className="text-neutral-500 font-bold uppercase text-[10px] tracking-widest">Pilot</TableHead>
+                  <TableHead className="text-neutral-500 font-bold uppercase text-[10px] tracking-widest">Player</TableHead>
                   <TableHead className="text-neutral-500 font-bold uppercase text-[10px] tracking-widest hidden md:table-cell">Contact</TableHead>
                   <TableHead className="text-right text-neutral-500 font-bold uppercase text-[10px] tracking-widest">Authority</TableHead>
                 </TableRow>
@@ -204,7 +204,7 @@ export default function LeagueDetails() {
                        {member.isAdmin ? (
                          <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[10px] uppercase font-black">Admin</Badge>
                        ) : (
-                         <Badge variant="outline" className="text-neutral-600 border-neutral-800 text-[10px] uppercase font-black">Pilot</Badge>
+                         <Badge variant="outline" className="text-neutral-600 border-neutral-800 text-[10px] uppercase font-black">Player</Badge>
                        )}
                     </TableCell>
                   </TableRow>
@@ -227,7 +227,7 @@ export default function LeagueDetails() {
            </div>
            <div className="flex items-center gap-2 bg-neutral-950 p-2 rounded-2xl border border-neutral-800 w-full md:w-auto">
               <code className="px-3 font-mono font-bold text-red-400 text-lg">{league.leagueCode}</code>
-              <Button size="icon" onClick={copyCode} variant="ghost" className="hover:bg-neutral-800 text-neutral-500 hover:text-white">
+              <Button size="icon" onClick={copyCode} variant="ghost" className="hover:bg-neutral-800 text-white hover:text-white hover:text-white">
                  <Copy className="w-4 h-4" />
               </Button>
            </div>
@@ -247,7 +247,7 @@ export default function LeagueDetails() {
            
            <div className="space-y-6 py-4">
               <div className="space-y-2">
-                 <Label className="text-xs font-black uppercase tracking-widest text-neutral-500">Pilot List</Label>
+                 <Label className="text-xs font-black uppercase tracking-widest text-neutral-500">Player List</Label>
                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                     {league.allMembers.map((m) => (
                        <div key={m.userId} className="flex items-center justify-between p-3 bg-neutral-950 rounded-xl border border-neutral-800">
@@ -303,14 +303,14 @@ export default function LeagueDetails() {
            <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                  <Share2 className="w-5 h-5 text-red-500" />
-                 Invite Pilots
+                 Invite Players
               </DialogTitle>
               <DialogDescription>Share this code with your friends to bring them into the race.</DialogDescription>
            </DialogHeader>
            
            <div className="flex flex-col items-center gap-6 py-6">
               <div className="text-center">
-                 <div className="text-[10px] font-black uppercase text-neutral-600 tracking-widest mb-2">Arena Entry Code</div>
+                 <div className="text-[10px] font-black uppercase text-white hover:text-white tracking-widest mb-2">Arena Entry Code</div>
                  <div className="text-5xl font-black italic uppercase tracking-tighter text-red-500 bg-red-500/5 px-6 py-3 rounded-2xl border border-red-500/20">
                     {league.leagueCode}
                  </div>

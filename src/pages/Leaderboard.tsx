@@ -40,7 +40,8 @@ export default function Leaderboard() {
     const fetchMatches = async () => {
       try {
         const { data } = await api.get<Match[]>("/admin/api/matches/allmatches");
-        const sortedMatches = (data || []).sort((a, b) => b.gamedayId - a.gamedayId);
+        const completedMatches = (data || []).filter(m => Number(m.status) === 4);
+        const sortedMatches = completedMatches.sort((a, b) => a.gamedayId - b.gamedayId);
         setMatches(sortedMatches);
       } catch (err) {
         console.error("Error fetching matches:", err);
@@ -105,7 +106,7 @@ export default function Leaderboard() {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 font-bold group" 
+            className="text-white hover:text-white hover:text-red-500 hover:bg-red-500/10 font-bold group" 
             onClick={() => navigate("/dashboard")}
           >
             <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
@@ -124,7 +125,7 @@ export default function Leaderboard() {
             </div>
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.35em] text-red-600 italic">Global Hall of Fame</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.35em] text-red-600 italic">Global Leaderboard</p>
                 <Badge className="bg-neutral-800 text-neutral-400 border-none text-[8px] font-black uppercase tracking-widest px-2 h-4">
                   All Drivers
                 </Badge>
@@ -133,7 +134,7 @@ export default function Leaderboard() {
                 World <span className="text-red-600">Standings</span>
               </h1>
               <p className="text-neutral-500 font-bold uppercase tracking-widest italic text-[10px]">
-                Competing against every pilot on the global grid
+                Compete against all other players
               </p>
             </div>
           </div>
@@ -179,7 +180,7 @@ export default function Leaderboard() {
                 </CardTitle>
               </div>
               <Badge variant="outline" className="bg-red-600/10 border-red-600/20 text-red-500 text-[10px] font-black uppercase italic px-3 py-1">
-                {rankings.length} Active Pilots
+                {rankings.length} Active Players
               </Badge>
             </div>
           </CardHeader>
@@ -189,7 +190,7 @@ export default function Leaderboard() {
               <TableHeader className="bg-neutral-950/20 border-b border-white/5">
                 <TableRow className="border-none hover:bg-transparent">
                   <TableHead className="w-24 pl-8 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic">Pos</TableHead>
-                  <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic pl-12">Pilot</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic pl-12">Player</TableHead>
                   <TableHead className="text-right pr-8 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 italic">Pts Earned</TableHead>
                 </TableRow>
               </TableHeader>
@@ -239,7 +240,7 @@ export default function Leaderboard() {
                            <span className="font-mono font-black text-3xl italic text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] group-hover:text-red-500 transition-colors">
                              {r.points?.toLocaleString() || "0"}
                            </span>
-                           <span className="text-[8px] font-black text-neutral-600 uppercase tracking-[0.2em] italic">Total Pts</span>
+                           <span className="text-[8px] font-black text-white hover:text-white uppercase tracking-[0.2em] italic">Total Pts</span>
                         </div>
                       </TableCell>
                     </TableRow>

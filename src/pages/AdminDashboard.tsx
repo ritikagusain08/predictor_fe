@@ -26,8 +26,10 @@ import {
   Search,
   Trash2,
   Check,
-  X
+  X,
+  FileText
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 interface Player {
@@ -73,6 +75,7 @@ export default function AdminDashboard() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<QuestionData | null>(null);
   const [resolvingQuestion, setResolvingQuestion] = useState<QuestionData | null>(null);
+  const [viewingQuestion, setViewingQuestion] = useState<QuestionData | null>(null);
 
   // Create Question State
   const navigate = useNavigate();
@@ -126,6 +129,9 @@ export default function AdminDashboard() {
       const list = Array.isArray(res.data) ? res.data : [];
       const sortedMatches = list.sort((a: Match, b: Match) => a.matchId - b.matchId);
       setMatches(sortedMatches);
+      if (sortedMatches.length > 0) {
+        setMatchId(sortedMatches[0].matchId);
+      }
     }).catch(err => console.error("Matches Fetch Error:", err));
 
     api.get("/admin/api/players/allplayers").then((res) => {
@@ -230,7 +236,7 @@ export default function AdminDashboard() {
     if (!confirm("Delete this admin league?")) return;
     try {
       setLoading(true);
-      await api.delete("/admin/adminleague/delete", { data: { id } });
+      await api.delete("/admin/api/adminleague/delete", { data: { id } });
       alert("League deleted!");
       fetchAdminLeagues();
     } catch (err) {
@@ -329,7 +335,23 @@ export default function AdminDashboard() {
     setShowTeamSelector(false);
   };
 
-  // Removed unused toggleSelectAllDrivers and toggleSelectAllTeams functions
+  const toggleSelectAllDrivers = () => {
+    const availablePlayers = players.filter(p => !options.some(opt => opt.optionDesc === p.playerName));
+    if (selectedDriverIds.length === availablePlayers.length) {
+      setSelectedDriverIds([]);
+    } else {
+      setSelectedDriverIds(availablePlayers.map(p => p.playerId));
+    }
+  };
+
+  const toggleSelectAllTeams = () => {
+    const availableTeams = teams.filter(t => !options.some(opt => opt.optionDesc === t.teamName));
+    if (selectedTeamIds.length === availableTeams.length) {
+      setSelectedTeamIds([]);
+    } else {
+      setSelectedTeamIds(availableTeams.map(t => t.teamId));
+    }
+  };
 
   const handleDriverToggle = (pId: string) => {
     if (selectedDriverIds.includes(pId)) {
@@ -424,9 +446,34 @@ export default function AdminDashboard() {
     const updated = [...resolveOptions];
     updated[index] = { ...updated[index], [f]: v };
     
-    // If it's a SINGLE type, ensure only one is correct
-    if (resolvingQuestion?.questionType === "SINGLE" && f === "isCorrect" && v === true) {
-      updated.forEach((opt, i) => { if (i !== index) opt.isCorrect = false; });
+    if (f === "isCorrect") {
+      const isPodium = Boolean(resolvingQuestion?.questionType?.toUpperCase().includes("PODIUM"));
+      if (v === true) {
+        if (isPodium) {
+          const existingMaxPos = Math.max(0, ...updated.filter((o, i) => i !== index && o.isCorrect).map(o => o.position));
+          updated[index].position = existingMaxPos + 1;
+        } else {
+          if (resolvingQuestion?.choiceLimit === 1 || resolvingQuestion?.questionType === "SINGLE OPTION" || resolvingQuestion?.questionType === "BINARY" || resolvingQuestion?.questionType === "H2H") {
+            updated.forEach((opt, i) => { 
+              if (i !== index) {
+                opt.isCorrect = false; 
+                opt.position = 0;
+              }
+            });
+          }
+          updated[index].position = 0;
+        }
+      } else {
+        updated[index].position = 0;
+        if (isPodium) {
+          let currPos = 1;
+          updated.forEach(opt => {
+            if (opt.isCorrect) {
+              opt.position = currPos++;
+            }
+          });
+        }
+      }
     }
     
     setResolveOptions(updated);
@@ -650,6 +697,7 @@ export default function AdminDashboard() {
                       setShowCreateForm(false);
                       setEditingQuestion(null);
                     } else {
+                      setMatchId(viewMatchId > 0 ? viewMatchId : (matches[0]?.matchId || 0));
                       setShowCreateForm(true);
                     }
                   }}
@@ -690,7 +738,7 @@ export default function AdminDashboard() {
                       <TableRow className="border-none">
                         <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 italic">Description</TableHead>
                         <TableHead className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 italic w-32">Status</TableHead>
-                        <TableHead className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 italic w-32">Rank</TableHead>
+                        <TableHead className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 italic w-32">Position</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -744,25 +792,25 @@ export default function AdminDashboard() {
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Parent Match</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Match ID</Label>
                       <select 
                         value={matchId} 
                         onChange={(e) => setMatchId(Number(e.target.value))} 
                         required 
                         className="w-full bg-neutral-950 border border-white/5 h-12 rounded-xl px-4 text-white text-sm font-bold italic outline-none focus:border-red-600 transition-all appearance-none"
                       >
-                        <option value="" disabled>Select Match Sequence</option>
+                        <option value={0} disabled>Select Match Sequence</option>
                         {matches.map(m => <option key={m.matchId} value={m.matchId}>{m.matchId} - {m.circuitLocation}</option>)}
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Sequence Position</Label>
-                       <Input type="number" value={questionNo} onChange={(e) => setQuestionNo(Number(e.target.value))} required className="bg-neutral-950 border-white/5 h-12 rounded-xl font-mono text-red-600 text-lg font-black" />
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Question ID</Label>
+                       <Input type="number" value={questionNo} onChange={(e) => setQuestionNo(Number(e.target.value))} required className="bg-neutral-950 border-white/5 h-12 rounded-xl font-mono text-white text-lg font-black" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Prompt Description</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Question Description</Label>
                     <textarea 
                       value={description} 
                       onChange={(e) => setDescription(e.target.value)} 
@@ -774,7 +822,7 @@ export default function AdminDashboard() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Logic Type</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Question Type</Label>
                       <select 
                         value={type} 
                         onChange={(e) => handleTypeChange(e.target.value)} 
@@ -789,11 +837,11 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Selection Cap</Label>
-                       <Input type="number" value={limit} disabled={type === "PODIUM"} onChange={(e) => setLimit(Number(e.target.value))} className="bg-neutral-950 border-white/5 h-12 rounded-xl font-mono text-sm font-bold" />
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Choice Limit</Label>
+                       <Input type="number" value={limit} disabled={type === "PODIUM"} onChange={(e) => setLimit(Number(e.target.value))} className="bg-neutral-950 border-white/5 h-12 rounded-xl font-mono text-sm font-bold text-white" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Initial Status</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Question Status</Label>
                        <Badge className="w-full h-12 bg-neutral-950 border border-white/5 text-neutral-400 font-black italic uppercase tracking-widest rounded-xl justify-center text-[9px]">NOT STARTED</Badge>
                     </div>
                   </div>
@@ -805,11 +853,11 @@ export default function AdminDashboard() {
                         <h3 className="text-lg font-black italic uppercase tracking-tighter text-red-600">Response Options</h3>
                        {["PODIUM", "PICK ONE OR MORE DRIVERS/CONSTUCTORS", "MULTI OPTION CHECKBOX", "SINGLE OPTION", "H2H"].includes(type) && (
                         <div className="flex gap-3">
-                          <Button type="button" onClick={() => setShowDriverSelector(true)} className="bg-red-600/10 text-red-600 border border-red-600/20 hover:bg-red-600 hover:text-white h-10 px-4 rounded-lg font-black uppercase italic tracking-widest text-[9px]">
+                          <Button type="button" onClick={() => setShowDriverSelector(true)} className="bg-red-600/10 text-white border border-red-600/20 hover:bg-red-600 hover:text-white h-10 px-4 rounded-lg font-black uppercase italic tracking-widest text-[9px]">
                             + Drivers
                           </Button>
                           {type !== "PODIUM" && (
-                            <Button type="button" onClick={() => setShowTeamSelector(true)} className="bg-red-600/10 text-red-600 border border-red-600/20 hover:bg-red-600 hover:text-white h-10 px-4 rounded-lg font-black uppercase italic tracking-widest text-[9px]">
+                            <Button type="button" onClick={() => setShowTeamSelector(true)} className="bg-red-600/10 text-white border border-red-600/20 hover:bg-red-600 hover:text-white h-10 px-4 rounded-lg font-black uppercase italic tracking-widest text-[9px]">
                               + Teams
                             </Button>
                           )}
@@ -845,12 +893,12 @@ export default function AdminDashboard() {
                             { optionId: 1, optionDesc: "Yes", points: 0, position: 1, isCorrect: false },
                             { optionId: 2, optionDesc: "No", points: 0, position: 2, isCorrect: false }
                           ]);
-                        }} variant="outline" className="border-white/10 hover:bg-neutral-800 text-neutral-400 font-black uppercase italic tracking-widest text-[9px] h-12 rounded-xl">
+                        }} variant="outline" className="bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest text-[9px] h-12 rounded-xl">
                           Generate Binary (Y/N)
                         </Button>
                       )}
                       {!["PODIUM", "BINARY"].includes(type) && (
-                        <Button type="button" onClick={addOption} variant="outline" className="border-white/10 hover:bg-neutral-800 text-neutral-400 font-black uppercase italic tracking-widest text-[9px] h-12 rounded-xl">
+                        <Button type="button" onClick={addOption} variant="outline" className="bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest text-[9px] h-12 rounded-xl">
                           + Custom Option
                         </Button>
                       )}
@@ -935,10 +983,22 @@ export default function AdminDashboard() {
                                   <Button 
                                     variant="ghost" 
                                     size="icon" 
+                                    disabled={q.questionStatus >= 1}
                                     onClick={() => handleEditQuestion(q)}
-                                    className="h-9 w-9 text-neutral-600 hover:text-white"
+                                    className="h-9 w-9 text-white hover:text-white hover:text-white disabled:opacity-30 disabled:hover:text-neutral-600"
+                                    title="Edit Question"
                                   >
                                     <Edit3 className="w-4 h-4" />
+                                  </Button>
+
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => setViewingQuestion(q)}
+                                    className="h-9 w-9 text-neutral-400 hover:text-white hover:bg-neutral-800"
+                                    title="View Details"
+                                  >
+                                    <FileText className="w-4 h-4" />
                                   </Button>
                                   
                                   {(q.questionStatus === 2 || q.questionStatus === 3 || q.questionStatus === 4) && (
@@ -965,10 +1025,67 @@ export default function AdminDashboard() {
                   <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-[3rem]">
                      <AlertCircle className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
                      <p className="font-black uppercase italic text-neutral-400 text-sm tracking-widest">No questions found in this sector.</p>
+                     <Button 
+                      onClick={() => {
+                        setMatchId(viewMatchId > 0 ? viewMatchId : (matches[0]?.matchId || 0));
+                        setShowCreateForm(true);
+                      }}
+                      className="mt-6 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest text-xs h-12 px-8 rounded-xl shadow-lg shadow-red-600/20"
+                    >
+                      <Plus className="w-4 h-4 mr-2" /> Add Question
+                    </Button>
                   </div>
                 )}
               </div>
             )}
+
+            {/* 🔹 VIEW DETAILS DIALOG */}
+            <Dialog open={viewingQuestion !== null} onOpenChange={(open) => { if (!open) setViewingQuestion(null); }}>
+              <DialogContent className="bg-neutral-900 border border-white/10 text-white rounded-[2.5rem] p-8 max-w-2xl overflow-hidden">
+                <DialogHeader className="space-y-3 pb-6 border-b border-white/5">
+                  <div className="flex items-center justify-between">
+                    <Badge className="bg-red-600/10 text-red-500 border-none font-black italic uppercase tracking-widest text-[10px]">Q{viewingQuestion?.questionNo}</Badge>
+                    <Badge variant="outline" className="border-neutral-800 text-neutral-400 text-[10px] font-black uppercase tracking-widest">{viewingQuestion?.questionType}</Badge>
+                  </div>
+                  <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter text-white">
+                    {viewingQuestion?.questionDescription}
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="py-6 space-y-6">
+                  <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-neutral-400 bg-neutral-950/50 p-4 rounded-2xl border border-white/5">
+                    <span>Choice Limit: <strong className="text-white">{viewingQuestion?.choiceLimit}</strong></span>
+                    <span>Status: <strong className="text-red-500">{viewingQuestion ? getStatusLabel(viewingQuestion.questionStatus) : ""}</strong></span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-white hover:text-white italic ml-1">Available Selections ({viewingQuestion?.options?.length || 0})</Label>
+                    <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                      {viewingQuestion?.options?.map((opt, index) => (
+                        <div key={opt.id || index} className="flex items-center justify-between bg-neutral-950 p-4 rounded-xl border border-white/5">
+                          <div className="flex items-center gap-3">
+                            <span className="w-6 h-6 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center font-mono font-bold text-xs text-neutral-400">
+                              {index + 1}
+                            </span>
+                            <span className="font-bold text-neutral-200 text-sm">{opt.optionDesc}</span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Badge variant="outline" className="border-neutral-800 text-neutral-400 font-mono text-[10px]">
+                              {opt.points} pts
+                            </Badge>
+                            {opt.isCorrect && (
+                              <Badge className="bg-green-600/10 text-green-500 border-none font-black text-[10px]">
+                                Correct (Pos {opt.position})
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
 
@@ -1274,7 +1391,7 @@ export default function AdminDashboard() {
                   onClick={() => { setAdminLeagueSubTab("list"); setSelectedAdminLeague(null); setEditingAdminLeague(null); }}
                   className={cn(
                     "px-6 py-2 rounded-lg text-[10px] font-black uppercase italic tracking-widest transition-all",
-                    adminLeagueSubTab === "list" ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-neutral-500 hover:text-white"
+                    adminLeagueSubTab === "list" ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-white hover:text-white hover:text-white"
                   )}
                 >
                   All Leagues
@@ -1395,10 +1512,10 @@ export default function AdminDashboard() {
 
                           if (editingAdminLeague) {
                             payload.id = editingAdminLeague.id;
-                            await api.put("/admin/adminleague/update", payload);
+                            await api.put("/admin/api/adminleague/update", payload);
                             alert("League Updated Successfully!");
                           } else {
-                            await api.post("/admin/adminleague/create", payload);
+                            await api.post("/admin/api/adminleague/create", payload);
                             alert("League Launched Successfully!");
                           }
 
@@ -1491,7 +1608,7 @@ export default function AdminDashboard() {
                       { label: "Created At", val: selectedAdminLeague.createdAtMatchId, icon: Timer },
                     ].map((info, idx) => (
                       <div key={idx} className="bg-neutral-950 p-6 rounded-2xl border border-white/5 space-y-3">
-                        <div className="flex items-center gap-2 text-neutral-500">
+                        <div className="flex items-center gap-2 text-white hover:text-white">
                           <info.icon className="w-3 h-3" />
                           <span className="text-[9px] font-black uppercase tracking-tight italic">{info.label}</span>
                         </div>
@@ -1614,8 +1731,13 @@ export default function AdminDashboard() {
           <div className="absolute inset-0 bg-neutral-950/90 backdrop-blur-md" onClick={() => setShowDriverSelector(false)} />
           <Card className="relative bg-neutral-900 border border-white/10 rounded-[3rem] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
             <CardHeader className="bg-neutral-950 p-8 border-b border-white/5 flex flex-row items-center justify-between">
-               <CardTitle className="text-2xl font-black italic uppercase tracking-tighter">Driver <span className="text-red-600">Selection</span></CardTitle>
-               <Button variant="ghost" size="icon" onClick={() => setShowDriverSelector(false)} className="rounded-full"><X className="w-6 h-6" /></Button>
+               <div className="flex items-center gap-4">
+                 <CardTitle className="text-2xl font-black italic uppercase tracking-tighter text-white">Driver <span className="text-red-600">Selection</span></CardTitle>
+                 <Button variant="outline" size="sm" onClick={toggleSelectAllDrivers} className="bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest text-[9px] h-8 px-3">
+                   {selectedDriverIds.length === players.filter(p => !options.some(opt => opt.optionDesc === p.playerName)).length && selectedDriverIds.length > 0 ? "Deselect All" : "Select All"}
+                 </Button>
+               </div>
+               <Button variant="outline" size="icon" onClick={() => setShowDriverSelector(false)} className="rounded-full bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white"><X className="w-6 h-6" /></Button>
             </CardHeader>
             <CardContent className="p-8 overflow-y-auto flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1638,7 +1760,7 @@ export default function AdminDashboard() {
             </CardContent>
             <div className="p-8 bg-neutral-950 border-t border-white/5 flex gap-4">
                <Button onClick={handleAddSelectedDrivers} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl shadow-lg">Confirm Selection</Button>
-               <Button variant="outline" onClick={() => setShowDriverSelector(false)} className="flex-1 border-white/10 text-neutral-400 font-black uppercase italic tracking-widest h-14 rounded-xl">Cancel</Button>
+               <Button variant="outline" onClick={() => setShowDriverSelector(false)} className="flex-1 bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl">Cancel</Button>
             </div>
           </Card>
         </div>
@@ -1649,8 +1771,13 @@ export default function AdminDashboard() {
           <div className="absolute inset-0 bg-neutral-950/90 backdrop-blur-md" onClick={() => setShowTeamSelector(false)} />
           <Card className="relative bg-neutral-900 border border-white/10 rounded-[3rem] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
             <CardHeader className="bg-neutral-950 p-8 border-b border-white/5 flex flex-row items-center justify-between">
-               <CardTitle className="text-2xl font-black italic uppercase tracking-tighter">Team <span className="text-red-600">Selection</span></CardTitle>
-               <Button variant="ghost" size="icon" onClick={() => setShowTeamSelector(false)} className="rounded-full"><X className="w-6 h-6" /></Button>
+               <div className="flex items-center gap-4">
+                 <CardTitle className="text-2xl font-black italic uppercase tracking-tighter text-white">Team <span className="text-red-600">Selection</span></CardTitle>
+                 <Button variant="outline" size="sm" onClick={toggleSelectAllTeams} className="bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest text-[9px] h-8 px-3">
+                   {selectedTeamIds.length === teams.filter(t => !options.some(opt => opt.optionDesc === t.teamName)).length && selectedTeamIds.length > 0 ? "Deselect All" : "Select All"}
+                 </Button>
+               </div>
+               <Button variant="outline" size="icon" onClick={() => setShowTeamSelector(false)} className="rounded-full bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white"><X className="w-6 h-6" /></Button>
             </CardHeader>
             <CardContent className="p-8 overflow-y-auto flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1673,7 +1800,7 @@ export default function AdminDashboard() {
             </CardContent>
             <div className="p-8 bg-neutral-950 border-t border-white/5 flex gap-4">
                <Button onClick={handleAddSelectedTeams} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl shadow-lg">Confirm Selection</Button>
-               <Button variant="outline" onClick={() => setShowTeamSelector(false)} className="flex-1 border-white/10 text-neutral-400 font-black uppercase italic tracking-widest h-14 rounded-xl">Cancel</Button>
+               <Button variant="outline" onClick={() => setShowTeamSelector(false)} className="flex-1 bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl">Cancel</Button>
             </div>
           </Card>
         </div>

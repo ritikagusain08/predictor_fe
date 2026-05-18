@@ -60,14 +60,14 @@ export default function RoleSelection() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full border-neutral-700 hover:bg-neutral-800 text-white h-11">
-                Go to Admin Panel
+              <Button className="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-bold h-11 border border-neutral-700">
+                Go to Admin Panel <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        <p className="text-center text-neutral-600 text-xs mt-12 font-medium tracking-widest uppercase">
+        <p className="text-center text-white hover:text-white text-xs mt-12 font-medium tracking-widest uppercase">
           Predictor Game v2.0 • 2026 Season
         </p>
       </div>

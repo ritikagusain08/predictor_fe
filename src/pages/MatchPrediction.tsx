@@ -39,8 +39,7 @@ export default function MatchPrediction() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Use user-facing endpoint instead of admin if possible
-        const { data } = await api.get<Question[]>(`/api/questions/${matchId}`);
+        const { data } = await api.get<Question[]>(`/admin/api/questions/${matchId}`);
         
         if (!data || !Array.isArray(data) || data.length === 0) {
           setQuestions([]);
@@ -55,7 +54,7 @@ export default function MatchPrediction() {
           const userId = localStorage.getItem("userId");
           if (!userId) return;
 
-          const { data: predData } = await api.get(`/api/predictions/get/${userId}/${matchId}`);
+          const { data: predData } = await api.get(`/api/predictions/get/${matchId}`);
           
           if (predData && predData.predictions) {
             const formattedAnswers: Record<number, number[]> = {};
@@ -74,15 +73,6 @@ export default function MatchPrediction() {
         }
       } catch (err) {
         console.error("Failed to fetch prediction data:", err);
-        // Fallback to admin endpoint if user one fails (some environments use admin for both)
-        try {
-           const { data: adminData } = await api.get<Question[]>(`/admin/api/questions/${matchId}`);
-           if (adminData && Array.isArray(adminData)) {
-              setQuestions(adminData.sort((a, b) => a.questionNo - b.questionNo));
-           }
-        } catch (adminErr) {
-           console.error("Admin fallback also failed:", adminErr);
-        }
       } finally {
         setLoading(false);
       }
@@ -151,14 +141,14 @@ export default function MatchPrediction() {
       </div>
       <div className="text-center space-y-2">
          <p className="text-white font-black uppercase italic tracking-widest text-lg">No Questions Found</p>
-         <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] italic">Telemetry data is unavailable for this race.</p>
+         <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] italic">No match data is available.</p>
       </div>
       <Button 
         variant="outline" 
         className="border-white/10 text-neutral-400 hover:text-white"
         onClick={() => navigate("/dashboard")}
       >
-        Return to Paddock
+        Back to Dashboard
       </Button>
     </div>
   );
@@ -166,7 +156,7 @@ export default function MatchPrediction() {
   if (loading) return (
     <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center space-y-6">
       <div className="w-12 h-12 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-      <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] italic">Telemetry Sync...</p>
+      <p className="text-white hover:text-white font-bold uppercase tracking-[0.3em] text-[10px] italic">Loading...</p>
     </div>
   );
 
@@ -195,7 +185,7 @@ export default function MatchPrediction() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-[9px] font-bold uppercase text-neutral-500 italic tracking-widest">{match?.circuitLocation}</span>
-            <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-white font-bold h-7 text-[10px]" onClick={() => navigate("/dashboard")}>
+            <Button variant="ghost" size="sm" className="text-white hover:text-white hover:text-white font-bold h-7 text-[10px]" onClick={() => navigate("/dashboard")}>
               Exit
             </Button>
           </div>
@@ -207,7 +197,7 @@ export default function MatchPrediction() {
         {/* 🔹 PROGRESS */}
         <div className="flex justify-between items-end mb-6 px-1">
            <div className="flex flex-col">
-              <span className="text-[8px] font-black text-neutral-600 uppercase tracking-widest mb-1">Session Data</span>
+              <span className="text-[8px] font-black text-white hover:text-white uppercase tracking-widest mb-1">Progress</span>
               <div className="flex items-center gap-2">
                  <span className="font-mono text-2xl font-black text-white italic">0{currentIndex + 1}</span>
                  <div className="h-1 w-20 bg-neutral-950 rounded-full overflow-hidden">
@@ -226,7 +216,7 @@ export default function MatchPrediction() {
           <CardHeader className="pb-2 p-8">
             <div className="flex items-center gap-2 mb-2">
                <Activity className="w-3.5 h-3.5 text-red-600" />
-               <span className="text-[9px] font-black text-neutral-500 uppercase tracking-[0.4em] italic">Current session task</span>
+               <span className="text-[9px] font-black text-neutral-500 uppercase tracking-[0.4em] italic">Question</span>
             </div>
             <CardTitle className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-white leading-tight mb-2">
               {currentQuestion.questionDescription}
@@ -291,7 +281,7 @@ export default function MatchPrediction() {
                     <div className="flex flex-col items-start">
                        <span className="text-[10px] font-black uppercase italic tracking-[0.2em] leading-none mb-1">Booster Status</span>
                        <span className={cn("text-xs font-black uppercase italic", isBoosted ? "text-orange-500" : "text-neutral-500")}>
-                          {isBoosted ? "Nitro Active • 2x Points" : "Prime 2x Multiplier"}
+                          {isBoosted ? "Booster Active • 2x Points" : "2x Points Multiplier"}
                        </span>
                     </div>
                  </div>
@@ -308,7 +298,7 @@ export default function MatchPrediction() {
           <CardFooter className="px-8 pb-8 pt-2 flex justify-between gap-4">
             <Button 
               variant="outline" 
-              className="flex-1 border-white/5 bg-transparent hover:bg-neutral-900 text-neutral-600 hover:text-white h-12 rounded-xl font-black uppercase italic tracking-widest text-[10px]"
+              className="flex-1 border-white/5 bg-transparent hover:bg-neutral-900 text-white hover:text-white hover:text-white h-12 rounded-xl font-black uppercase italic tracking-widest text-[10px]"
               disabled={currentIndex === 0 || submitting} 
               onClick={() => setCurrentIndex(prev => prev - 1)}
             >
