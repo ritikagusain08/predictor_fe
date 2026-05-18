@@ -37,7 +37,7 @@ export default function Register() {
       {/* Background decorations */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-600/10 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-600/10 blur-[120px] rounded-full" />
-      
+
       <div className="w-full max-w-md relative z-10 animate-in fade-in zoom-in-95 duration-500">
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-red-600/20 rounded-2xl flex items-center justify-center mb-4 border border-red-500/30 shadow-[0_0_20px_rgba(220,38,38,0.2)]">
@@ -53,7 +53,7 @@ export default function Register() {
               Sign up to start playing and winning points!
             </CardDescription>
           </CardHeader>
-          
+
           {success ? (
             <CardContent className="py-10 flex flex-col items-center justify-center space-y-4">
               <CheckCircle2 className="w-16 h-16 text-green-500 animate-bounce" />
@@ -69,19 +69,19 @@ export default function Register() {
                     <p>{error}</p>
                   </div>
                 )}
-                
+
                 {/* USERNAME */}
                 <div className="space-y-2">
                   <Label htmlFor="username" className="text-neutral-300">Username (Pick a game name)</Label>
                   <div className="relative group">
                     <User className="absolute left-3 top-3 w-4 h-4 text-neutral-500 group-focus-within:text-red-500 transition-colors" />
-                    <Input 
+                    <Input
                       id="username"
-                      type="text" 
+                      type="text"
                       autoComplete="username"
-                      placeholder="e.g. SpeedRacer99" 
+                      placeholder="e.g. SpeedRacer99"
                       className="bg-neutral-950 border-neutral-800 pl-10 focus-visible:ring-red-500 focus-visible:border-red-500 text-white h-11"
-                      required 
+                      required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                     />
@@ -93,13 +93,13 @@ export default function Register() {
                   <Label htmlFor="email" className="text-neutral-300">Email Address</Label>
                   <div className="relative group">
                     <Mail className="absolute left-3 top-3 w-4 h-4 text-neutral-500 group-focus-within:text-red-500 transition-colors" />
-                    <Input 
+                    <Input
                       id="email"
-                      type="email" 
+                      type="email"
                       autoComplete="email"
-                      placeholder="example@gmail.com" 
+                      placeholder="example@gmail.com"
                       className="bg-neutral-950 border-neutral-800 pl-10 focus-visible:ring-red-500 focus-visible:border-red-500 text-white h-11"
-                      required 
+                      required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -111,12 +111,12 @@ export default function Register() {
                   <Label htmlFor="password" className="text-neutral-300">Password</Label>
                   <div className="relative group">
                     <Lock className="absolute left-3 top-3 w-4 h-4 text-neutral-500 group-focus-within:text-red-500 transition-colors" />
-                    <Input 
+                    <Input
                       id="password"
-                      type="password" 
-                      placeholder="Choose a strong password" 
+                      type="password"
+                      placeholder="Choose a strong password"
                       className="bg-neutral-950 border-neutral-800 pl-10 focus-visible:ring-red-500 focus-visible:border-red-500 text-white h-11"
-                      required 
+                      required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
@@ -124,8 +124,8 @@ export default function Register() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-4 pt-4">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-11 rounded-lg shadow-lg shadow-red-600/20"
                   disabled={loading}
                 >

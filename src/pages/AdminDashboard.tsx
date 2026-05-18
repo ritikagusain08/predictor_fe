@@ -9,16 +9,16 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  Trophy, 
-  Settings, 
-  Flag, 
-  ListTodo, 
-  Calculator, 
-  ChevronRight, 
-  Plus, 
-  Edit3, 
-  CheckCircle2, 
+import {
+  Trophy,
+  Settings,
+  Flag,
+  ListTodo,
+  Calculator,
+  ChevronRight,
+  Plus,
+  Edit3,
+  CheckCircle2,
   AlertCircle,
   Timer,
   LogOut,
@@ -43,8 +43,8 @@ interface Team {
 }
 
 interface OptionData {
-  id?: number;     
-  optionId: number; 
+  id?: number;
+  optionId: number;
   optionDesc: string;
   points: number;
   position: number;
@@ -63,7 +63,7 @@ interface QuestionData {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("questions"); 
+  const [activeTab, setActiveTab] = useState("questions");
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
   const [description, setDescription] = useState("");
   const [type, setType] = useState("SINGLE OPTION");
   const [limit, setLimit] = useState(1);
-  const [status, setStatus] = useState(0); 
+  const [status, setStatus] = useState(0);
   const [options, setOptions] = useState<OptionData[]>([
     { optionId: 1, optionDesc: "", points: 0, position: 0, isCorrect: false }
   ]);
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
   const [selectedDriverIds, setSelectedDriverIds] = useState<string[]>([]);
   const [showTeamSelector, setShowTeamSelector] = useState(false);
   const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([]);
-  
+
   // League Type State
   const [leagueTypeName, setLeagueTypeName] = useState("");
   const [requireCode, setRequireCode] = useState(true);
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
   const [selectedAdminLeague, setSelectedAdminLeague] = useState<any | null>(null);
   const [adminLeagueSubTab, setAdminLeagueSubTab] = useState("list");
   const [editingAdminLeague, setEditingAdminLeague] = useState<any | null>(null);
-  
+
   // Admin League Form State
   const [adminLeagueName, setAdminLeagueName] = useState("");
   const [adminTemplateId, setAdminTemplateId] = useState(0);
@@ -164,7 +164,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       const { data } = await api.get(`/admin/api/questions/${mId}`);
-      console.log("DEBUG: Fetched Questions Data:", data); 
+      console.log("DEBUG: Fetched Questions Data:", data);
       // Sort questions by questionNo in ascending order
       const sortedQuestions = data.sort((a: QuestionData, b: QuestionData) => a.questionNo - b.questionNo);
       setQuestionsList(sortedQuestions);
@@ -285,7 +285,7 @@ export default function AdminDashboard() {
     setType(newType);
     if (newType === "PODIUM") {
       setLimit(3);
-      setOptions([]); 
+      setOptions([]);
       setShowDriverSelector(false);
       setShowTeamSelector(false);
       setSelectedDriverIds([]);
@@ -383,13 +383,13 @@ export default function AdminDashboard() {
     setType(q.questionType);
     setLimit(q.choiceLimit);
     setStatus(q.questionStatus);
-    setOptions(q.options.map(opt => ({ 
-      id: opt.id, 
-      optionId: opt.optionId, 
-      optionDesc: opt.optionDesc, 
-      points: opt.points, 
-      position: opt.position, 
-      isCorrect: opt.isCorrect 
+    setOptions(q.options.map(opt => ({
+      id: opt.id,
+      optionId: opt.optionId,
+      optionDesc: opt.optionDesc,
+      points: opt.points,
+      position: opt.position,
+      isCorrect: opt.isCorrect
     })));
     setShowCreateForm(true);
   };
@@ -397,14 +397,14 @@ export default function AdminDashboard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const payload = { 
-      questionNo, 
-      questionDescription: description, 
-      questionType: type, 
-      choiceLimit: limit, 
-      questionStatus: status, 
-      matchId, 
-      options: options.map(opt => ({ ...opt })) 
+    const payload = {
+      questionNo,
+      questionDescription: description,
+      questionType: type,
+      choiceLimit: limit,
+      questionStatus: status,
+      matchId,
+      options: options.map(opt => ({ ...opt }))
     };
 
     try {
@@ -415,19 +415,19 @@ export default function AdminDashboard() {
         await api.post("/admin/api/questions/create", payload);
         alert("Created Successfully!");
       }
-      
+
       // Reset Form
       setEditingQuestion(null);
-      setDescription(""); 
+      setDescription("");
       setOptions([{ optionId: 1, optionDesc: "", points: 0, position: 0, isCorrect: false }]);
       setShowCreateForm(false);
-      
+
       if (matchId === viewMatchId) fetchQuestions(viewMatchId);
-    } catch (err) { 
+    } catch (err) {
       console.error(err);
-      alert("Action Failed"); 
-    } finally { 
-      setLoading(false); 
+      alert("Action Failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -436,16 +436,16 @@ export default function AdminDashboard() {
 
   const openResolveView = (q: QuestionData) => {
     setResolvingQuestion(q);
-    setResolveOptions(q.options.map(opt => ({ 
-        ...opt, 
-        position: opt.position || 0 
-    }))); 
+    setResolveOptions(q.options.map(opt => ({
+      ...opt,
+      position: opt.position || 0
+    })));
   };
 
   const handleResolveOptionChange = (index: number, f: keyof OptionData, v: any) => {
     const updated = [...resolveOptions];
     updated[index] = { ...updated[index], [f]: v };
-    
+
     if (f === "isCorrect") {
       const isPodium = Boolean(resolvingQuestion?.questionType?.toUpperCase().includes("PODIUM"));
       if (v === true) {
@@ -454,9 +454,9 @@ export default function AdminDashboard() {
           updated[index].position = existingMaxPos + 1;
         } else {
           if (resolvingQuestion?.choiceLimit === 1 || resolvingQuestion?.questionType === "SINGLE OPTION" || resolvingQuestion?.questionType === "BINARY" || resolvingQuestion?.questionType === "H2H") {
-            updated.forEach((opt, i) => { 
+            updated.forEach((opt, i) => {
               if (i !== index) {
-                opt.isCorrect = false; 
+                opt.isCorrect = false;
                 opt.position = 0;
               }
             });
@@ -475,7 +475,7 @@ export default function AdminDashboard() {
         }
       }
     }
-    
+
     setResolveOptions(updated);
   };
 
@@ -528,7 +528,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex min-h-screen bg-neutral-950 text-white font-sans relative">
       <div className="absolute top-0 right-0 w-[40%] h-[400px] bg-red-600/5 blur-[120px] pointer-events-none" />
-      
+
       {/* 🔹 Sidebar */}
       <aside className="w-72 bg-neutral-900/50 backdrop-blur-xl border-r border-white/5 flex flex-col sticky top-0 h-screen z-50">
         <div className="p-8">
@@ -540,8 +540,8 @@ export default function AdminDashboard() {
           </div>
 
           <nav className="space-y-2">
-            <button 
-              onClick={() => { setActiveTab("matches"); setResolvingQuestion(null); setShowCreateForm(false); }} 
+            <button
+              onClick={() => { setActiveTab("matches"); setResolvingQuestion(null); setShowCreateForm(false); }}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all",
                 activeTab === "matches" ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-neutral-400 hover:text-white hover:bg-white/5"
@@ -549,8 +549,8 @@ export default function AdminDashboard() {
             >
               <Flag className="w-4 h-4" /> Matches
             </button>
-            <button 
-              onClick={() => { setActiveTab("questions"); setResolvingQuestion(null); setShowCreateForm(false); }} 
+            <button
+              onClick={() => { setActiveTab("questions"); setResolvingQuestion(null); setShowCreateForm(false); }}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all",
                 activeTab === "questions" ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-neutral-400 hover:text-white hover:bg-white/5"
@@ -558,8 +558,8 @@ export default function AdminDashboard() {
             >
               <ListTodo className="w-4 h-4" /> Questions
             </button>
-            <button 
-              onClick={() => { setActiveTab("leaguetypes"); setResolvingQuestion(null); setShowCreateForm(false); }} 
+            <button
+              onClick={() => { setActiveTab("leaguetypes"); setResolvingQuestion(null); setShowCreateForm(false); }}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all",
                 activeTab === "leaguetypes" ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-neutral-400 hover:text-white hover:bg-white/5"
@@ -567,8 +567,8 @@ export default function AdminDashboard() {
             >
               <Settings className="w-4 h-4" /> League Types
             </button>
-            <button 
-              onClick={() => { setActiveTab("adminleagues"); setResolvingQuestion(null); setShowCreateForm(false); }} 
+            <button
+              onClick={() => { setActiveTab("adminleagues"); setResolvingQuestion(null); setShowCreateForm(false); }}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all",
                 activeTab === "adminleagues" ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-neutral-400 hover:text-white hover:bg-white/5"
@@ -576,8 +576,8 @@ export default function AdminDashboard() {
             >
               <Trophy className="w-4 h-4" /> Admin Leagues
             </button>
-            <button 
-              onClick={() => { setActiveTab("calculations"); setResolvingQuestion(null); setShowCreateForm(false); }} 
+            <button
+              onClick={() => { setActiveTab("calculations"); setResolvingQuestion(null); setShowCreateForm(false); }}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black uppercase italic tracking-widest text-[10px] transition-all",
                 activeTab === "calculations" ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "text-neutral-400 hover:text-white hover:bg-white/5"
@@ -589,8 +589,8 @@ export default function AdminDashboard() {
         </div>
 
         <div className="mt-auto p-8 border-t border-white/5">
-           <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="w-full justify-start text-neutral-400 hover:text-red-500 hover:bg-red-500/10 font-bold"
             onClick={() => { localStorage.clear(); navigate("/"); }}
           >
@@ -601,7 +601,7 @@ export default function AdminDashboard() {
 
       {/* 🔹 Main Content */}
       <main className="flex-1 p-12 max-w-7xl mx-auto w-full relative z-10">
-        
+
         {activeTab === "matches" && (
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div>
@@ -627,7 +627,7 @@ export default function AdminDashboard() {
                         <TableCell className="py-5">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-neutral-950 rounded-xl border border-white/5 flex items-center justify-center text-neutral-400 group-hover:text-red-500 transition-colors">
-                               <Flag className="w-5 h-5" />
+                              <Flag className="w-5 h-5" />
                             </div>
                             <span className="font-black text-lg uppercase italic text-neutral-200 group-hover:text-white transition-colors">{m.circuitLocation}</span>
                           </div>
@@ -636,15 +636,15 @@ export default function AdminDashboard() {
                           <Badge className={cn(
                             "px-3 py-1 font-black uppercase italic tracking-widest text-[9px] border-none shadow-sm",
                             m.status === 1 ? "bg-green-500/10 text-green-500 shadow-green-500/10 animate-pulse" :
-                            m.status === 2 ? "bg-yellow-500/10 text-yellow-500 shadow-yellow-500/10" :
-                            "bg-red-500/10 text-red-500 shadow-red-500/10"
+                              m.status === 2 ? "bg-yellow-500/10 text-yellow-500 shadow-yellow-500/10" :
+                                "bg-red-500/10 text-red-500 shadow-red-500/10"
                           )}>
                             {getStatusLabel(m.status)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right pr-8 py-5">
-                          <select 
-                            value={m.status} 
+                          <select
+                            value={m.status}
                             onChange={async (e) => {
                               const newStatus = Number(e.target.value);
                               try {
@@ -683,15 +683,15 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.35em] text-red-600 italic mb-2">Questions & Rules</p>
                 <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">
-                  {resolvingQuestion ? "Resolve Question" : 
-                   editingQuestion ? "Edit Question" : 
-                   showCreateForm ? "Add Question" : 
-                   "Manage Questions"}
+                  {resolvingQuestion ? "Resolve Question" :
+                    editingQuestion ? "Edit Question" :
+                      showCreateForm ? "Add Question" :
+                        "Manage Questions"}
                 </h1>
               </div>
-              
+
               {!resolvingQuestion && (
-                <Button 
+                <Button
                   onClick={() => {
                     if (showCreateForm || editingQuestion) {
                       setShowCreateForm(false);
@@ -720,16 +720,16 @@ export default function AdminDashboard() {
                 <div className="relative z-10 space-y-8">
                   <div className="flex items-center justify-between border-b border-white/5 pb-8">
                     <div className="space-y-2">
-                       <Badge className="bg-green-600/10 text-green-500 border-none font-black italic uppercase tracking-widest text-[10px]">Awaiting Resolution</Badge>
-                       <h3 className="text-xl font-black italic uppercase tracking-tighter text-white leading-none">{resolvingQuestion.questionDescription}</h3>
-                       <div className="flex items-center gap-4 text-neutral-400 font-bold uppercase tracking-widest italic text-[9px] pt-2">
-                          <span>Type <span className="text-white">{resolvingQuestion.questionType}</span></span>
-                          <span>â€¢</span>
-                          <span>Limit <span className="text-white">{resolvingQuestion.choiceLimit}</span></span>
-                       </div>
+                      <Badge className="bg-green-600/10 text-green-500 border-none font-black italic uppercase tracking-widest text-[10px]">Awaiting Resolution</Badge>
+                      <h3 className="text-xl font-black italic uppercase tracking-tighter text-white leading-none">{resolvingQuestion.questionDescription}</h3>
+                      <div className="flex items-center gap-4 text-neutral-400 font-bold uppercase tracking-widest italic text-[9px] pt-2">
+                        <span>Type <span className="text-white">{resolvingQuestion.questionType}</span></span>
+                        <span>â€¢</span>
+                        <span>Limit <span className="text-white">{resolvingQuestion.choiceLimit}</span></span>
+                      </div>
                     </div>
                     <Button variant="ghost" onClick={() => setResolvingQuestion(null)} className="text-neutral-400 hover:text-red-500 h-14 w-14 rounded-full">
-                       <X className="w-6 h-6" />
+                      <X className="w-6 h-6" />
                     </Button>
                   </div>
 
@@ -749,20 +749,20 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell className="text-center py-6">
                             <div className="flex justify-center">
-                              <input 
-                                type="checkbox" 
-                                checked={opt.isCorrect} 
+                              <input
+                                type="checkbox"
+                                checked={opt.isCorrect}
                                 disabled={!opt.isCorrect && currentSelectedCount >= (resolvingQuestion.choiceLimit || 1)}
-                                onChange={(e) => handleResolveOptionChange(index, "isCorrect", e.target.checked)} 
+                                onChange={(e) => handleResolveOptionChange(index, "isCorrect", e.target.checked)}
                                 className="w-6 h-6 rounded-lg bg-neutral-950 border-white/10 checked:bg-green-600 accent-green-600 cursor-pointer"
                               />
                             </div>
                           </TableCell>
                           <TableCell className="text-center py-6">
                             <div className="flex justify-center">
-                              <Input 
+                              <Input
                                 type="number"
-                                value={opt.position} 
+                                value={opt.position}
                                 disabled={!opt.isCorrect}
                                 onChange={(e) => handleResolveOptionChange(index, "position", Number(e.target.value))}
                                 className="w-20 bg-neutral-950 border-white/10 text-center font-mono font-bold text-green-500 h-10 rounded-lg"
@@ -776,7 +776,7 @@ export default function AdminDashboard() {
                   </Table>
 
                   <div className="flex justify-end pt-6 border-t border-white/5">
-                    <Button 
+                    <Button
                       onClick={submitResolution}
                       disabled={loading}
                       className="bg-green-600 hover:bg-green-700 text-white font-black uppercase italic tracking-widest h-16 px-12 rounded-xl shadow-xl shadow-green-600/20 text-lg"
@@ -793,10 +793,10 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Match ID</Label>
-                      <select 
-                        value={matchId} 
-                        onChange={(e) => setMatchId(Number(e.target.value))} 
-                        required 
+                      <select
+                        value={matchId}
+                        onChange={(e) => setMatchId(Number(e.target.value))}
+                        required
                         className="w-full bg-neutral-950 border border-white/5 h-12 rounded-xl px-4 text-white text-sm font-bold italic outline-none focus:border-red-600 transition-all appearance-none"
                       >
                         <option value={0} disabled>Select Match Sequence</option>
@@ -805,16 +805,16 @@ export default function AdminDashboard() {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Question ID</Label>
-                       <Input type="number" value={questionNo} onChange={(e) => setQuestionNo(Number(e.target.value))} required className="bg-neutral-950 border-white/5 h-12 rounded-xl font-mono text-white text-lg font-black" />
+                      <Input type="number" value={questionNo} onChange={(e) => setQuestionNo(Number(e.target.value))} required className="bg-neutral-950 border-white/5 h-12 rounded-xl font-mono text-white text-lg font-black" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Question Description</Label>
-                    <textarea 
-                      value={description} 
-                      onChange={(e) => setDescription(e.target.value)} 
-                      required  
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      required
                       className="w-full bg-neutral-950 border border-white/5 rounded-2xl p-6 text-white font-bold italic h-32 outline-none focus:border-red-600 transition-all"
                       placeholder="Enter the official question text..."
                     />
@@ -823,9 +823,9 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Question Type</Label>
-                      <select 
-                        value={type} 
-                        onChange={(e) => handleTypeChange(e.target.value)} 
+                      <select
+                        value={type}
+                        onChange={(e) => handleTypeChange(e.target.value)}
                         className="w-full bg-neutral-950 border border-white/5 h-12 rounded-xl px-4 text-white text-sm font-bold italic outline-none focus:border-red-600 transition-all"
                       >
                         <option value="PODIUM">PODIUM (Top 3)</option>
@@ -838,11 +838,11 @@ export default function AdminDashboard() {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Choice Limit</Label>
-                       <Input type="number" value={limit} disabled={type === "PODIUM"} onChange={(e) => setLimit(Number(e.target.value))} className="bg-neutral-950 border-white/5 h-12 rounded-xl font-mono text-sm font-bold text-white" />
+                      <Input type="number" value={limit} disabled={type === "PODIUM"} onChange={(e) => setLimit(Number(e.target.value))} className="bg-neutral-950 border-white/5 h-12 rounded-xl font-mono text-sm font-bold text-white" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Question Status</Label>
-                       <Badge className="w-full h-12 bg-neutral-950 border border-white/5 text-neutral-400 font-black italic uppercase tracking-widest rounded-xl justify-center text-[9px]">NOT STARTED</Badge>
+                      <Badge className="w-full h-12 bg-neutral-950 border border-white/5 text-neutral-400 font-black italic uppercase tracking-widest rounded-xl justify-center text-[9px]">NOT STARTED</Badge>
                     </div>
                   </div>
 
@@ -850,8 +850,8 @@ export default function AdminDashboard() {
 
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-black italic uppercase tracking-tighter text-red-600">Response Options</h3>
-                       {["PODIUM", "PICK ONE OR MORE DRIVERS/CONSTUCTORS", "MULTI OPTION CHECKBOX", "SINGLE OPTION", "H2H"].includes(type) && (
+                      <h3 className="text-lg font-black italic uppercase tracking-tighter text-red-600">Response Options</h3>
+                      {["PODIUM", "PICK ONE OR MORE DRIVERS/CONSTUCTORS", "MULTI OPTION CHECKBOX", "SINGLE OPTION", "H2H"].includes(type) && (
                         <div className="flex gap-3">
                           <Button type="button" onClick={() => setShowDriverSelector(true)} className="bg-red-600/10 text-white border border-red-600/20 hover:bg-red-600 hover:text-white h-10 px-4 rounded-lg font-black uppercase italic tracking-widest text-[9px]">
                             + Drivers
@@ -869,17 +869,17 @@ export default function AdminDashboard() {
                       {options.map((opt, index) => (
                         <div key={index} className="grid grid-cols-12 gap-4 items-center bg-neutral-950 p-4 rounded-2xl border border-white/5 group hover:border-red-600/30 transition-all">
                           <div className="col-span-2">
-                             <Input type="number" value={opt.optionId} readOnly={type === "PODIUM"} onChange={(e) => handleOptionChange(index, "optionId", Number(e.target.value))} className="bg-neutral-900 border-none text-center font-mono font-bold text-red-600" />
+                            <Input type="number" value={opt.optionId} readOnly={type === "PODIUM"} onChange={(e) => handleOptionChange(index, "optionId", Number(e.target.value))} className="bg-neutral-900 border-none text-center font-mono font-bold text-red-600" />
                           </div>
                           <div className="col-span-7">
-                             <Input value={opt.optionDesc} placeholder="Option description..." readOnly={type === "PODIUM"} onChange={(e) => handleOptionChange(index, "optionDesc", e.target.value)} className="bg-neutral-900 border-none italic font-bold text-white" />
+                            <Input value={opt.optionDesc} placeholder="Option description..." readOnly={type === "PODIUM"} onChange={(e) => handleOptionChange(index, "optionDesc", e.target.value)} className="bg-neutral-900 border-none italic font-bold text-white" />
                           </div>
                           <div className="col-span-2">
-                             <Input type="number" value={opt.points} onChange={(e) => handleOptionChange(index, "points", Number(e.target.value))} className="bg-neutral-900 border-none text-center font-mono font-bold text-white" />
+                            <Input type="number" value={opt.points} onChange={(e) => handleOptionChange(index, "points", Number(e.target.value))} className="bg-neutral-900 border-none text-center font-mono font-bold text-white" />
                           </div>
                           <div className="col-span-1 flex justify-center">
                             <Button type="button" onClick={() => removeOption(index)} variant="ghost" className="text-neutral-700 hover:text-red-600 h-10 w-10 p-0 rounded-full">
-                               <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
@@ -906,7 +906,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="pt-8 border-t border-white/5 flex justify-end">
-                     <Button type="submit" disabled={loading} className="bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-red-600/20 text-xs">
+                    <Button type="submit" disabled={loading} className="bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-red-600/20 text-xs">
                       {loading ? "Processing..." : editingQuestion ? "Update Question" : "Create Question"}
                     </Button>
                   </div>
@@ -916,20 +916,20 @@ export default function AdminDashboard() {
               /** 🔽 LIST VIEW 🔽 */
               <div className="space-y-8 animate-in fade-in duration-700">
                 <Card className="bg-neutral-900/40 border border-white/5 p-8 rounded-[2.5rem]">
-                   <div className="flex items-center gap-4">
-                      <Search className="w-5 h-5 text-red-600" />
-                      <div className="flex-1">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Filter by Match</Label>
-                        <select 
-                          value={viewMatchId} 
-                          onChange={(e) => setViewMatchId(Number(e.target.value))} 
-                          className="w-full bg-transparent border-none text-sm font-black uppercase italic tracking-tight text-white outline-none cursor-pointer appearance-none"
-                        >
-                          <option value={0} className="bg-neutral-900 text-neutral-400">Select a Match</option>
-                          {matches.map(m => <option key={m.matchId} value={m.matchId} className="bg-neutral-900">{m.matchId} - {m.circuitLocation}</option>)}
-                        </select>
-                      </div>
-                   </div>
+                  <div className="flex items-center gap-4">
+                    <Search className="w-5 h-5 text-red-600" />
+                    <div className="flex-1">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Filter by Match</Label>
+                      <select
+                        value={viewMatchId}
+                        onChange={(e) => setViewMatchId(Number(e.target.value))}
+                        className="w-full bg-transparent border-none text-sm font-black uppercase italic tracking-tight text-white outline-none cursor-pointer appearance-none"
+                      >
+                        <option value={0} className="bg-neutral-900 text-neutral-400">Select a Match</option>
+                        {matches.map(m => <option key={m.matchId} value={m.matchId} className="bg-neutral-900">{m.matchId} - {m.circuitLocation}</option>)}
+                      </select>
+                    </div>
+                  </div>
                 </Card>
 
                 {!loading && questionsList.length > 0 && (
@@ -959,16 +959,16 @@ export default function AdminDashboard() {
                                 <Badge className={cn(
                                   "px-3 py-1 font-black uppercase italic tracking-widest text-[9px] border-none shadow-sm",
                                   q.questionStatus === 1 ? "bg-green-600 text-white shadow-lg shadow-green-600/20" :
-                                  q.questionStatus === 2 ? "bg-yellow-500 text-black shadow-lg shadow-yellow-500/10" :
-                                  "bg-neutral-800 text-neutral-400 border border-white/5"
+                                    q.questionStatus === 2 ? "bg-yellow-500 text-black shadow-lg shadow-yellow-500/10" :
+                                      "bg-neutral-800 text-neutral-400 border border-white/5"
                                 )}>
                                   {getStatusLabel(q.questionStatus)}
                                 </Badge>
                               </TableCell>
                               <TableCell className="text-right pr-8 py-6">
                                 <div className="flex items-center justify-end gap-3">
-                                  <select 
-                                    value={q.questionStatus} 
+                                  <select
+                                    value={q.questionStatus}
                                     onChange={(e) => handleStatusChange(q, Number(e.target.value))}
                                     disabled={loading || q.questionStatus === 3 || q.questionStatus === 4}
                                     className="bg-neutral-950 border border-white/5 text-[9px] font-black uppercase italic tracking-widest rounded-lg px-3 h-9 outline-none focus:border-red-600 transition-all cursor-pointer text-white"
@@ -979,10 +979,10 @@ export default function AdminDashboard() {
                                     <option value={3} disabled>PC STARTED</option>
                                     <option value={4} disabled>PC DONE</option>
                                   </select>
-                                  
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
+
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
                                     disabled={q.questionStatus >= 1}
                                     onClick={() => handleEditQuestion(q)}
                                     className="h-9 w-9 text-white hover:text-white hover:text-white disabled:opacity-30 disabled:hover:text-neutral-600"
@@ -991,18 +991,18 @@ export default function AdminDashboard() {
                                     <Edit3 className="w-4 h-4" />
                                   </Button>
 
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => setViewingQuestion(q)}
                                     className="h-9 w-9 text-neutral-400 hover:text-white hover:bg-neutral-800"
                                     title="View Details"
                                   >
                                     <FileText className="w-4 h-4" />
                                   </Button>
-                                  
+
                                   {(q.questionStatus === 2 || q.questionStatus === 3 || q.questionStatus === 4) && (
-                                    <Button 
+                                    <Button
                                       onClick={() => openResolveView(q)}
                                       className={cn(
                                         "h-9 px-4 font-black uppercase italic tracking-widest text-[9px] rounded-lg shadow-sm transition-all",
@@ -1023,9 +1023,9 @@ export default function AdminDashboard() {
                 )}
                 {viewMatchId > 0 && questionsList.length === 0 && !loading && (
                   <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-[3rem]">
-                     <AlertCircle className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
-                     <p className="font-black uppercase italic text-neutral-400 text-sm tracking-widest">No questions found in this sector.</p>
-                     <Button 
+                    <AlertCircle className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
+                    <p className="font-black uppercase italic text-neutral-400 text-sm tracking-widest">No questions found in this sector.</p>
+                    <Button
                       onClick={() => {
                         setMatchId(viewMatchId > 0 ? viewMatchId : (matches[0]?.matchId || 0));
                         setShowCreateForm(true);
@@ -1096,9 +1096,9 @@ export default function AdminDashboard() {
                 <p className="text-[10px] font-black uppercase tracking-[0.35em] text-red-600 italic mb-2">Template Settings</p>
                 <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">League <span className="text-red-600">Templates</span></h1>
               </div>
-              
+
               <div className="flex bg-neutral-900/50 p-1 rounded-xl border border-white/5">
-                <button 
+                <button
                   onClick={() => { setLeagueSubTab("list"); setSelectedLeagueType(null); }}
                   className={cn(
                     "px-6 py-2 rounded-lg text-[10px] font-black uppercase italic tracking-widest transition-all",
@@ -1107,10 +1107,10 @@ export default function AdminDashboard() {
                 >
                   All Templates
                 </button>
-                <button 
-                  onClick={() => { 
-                    setLeagueSubTab("types"); 
-                    setSelectedLeagueType(null); 
+                <button
+                  onClick={() => {
+                    setLeagueSubTab("types");
+                    setSelectedLeagueType(null);
                     setEditingLeagueType(null);
                     // Reset form
                     setLeagueTypeName("");
@@ -1161,23 +1161,23 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell className="text-right pr-8 py-5">
                             <div className="flex items-center justify-end gap-2">
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 onClick={() => setSelectedLeagueType(type)}
                                 className="h-8 px-4 font-black uppercase italic tracking-widest text-[9px] text-red-600 hover:text-white hover:bg-red-600 transition-all rounded-lg"
                               >
                                 Details
                               </Button>
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="icon"
                                 onClick={() => startEditLeagueType(type)}
                                 className="h-8 w-8 text-neutral-400 hover:text-white"
                               >
                                 <Edit3 className="w-4 h-4" />
                               </Button>
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="icon"
                                 onClick={() => handleDeleteLeagueType(type.id)}
                                 className="h-8 w-8 text-neutral-400 hover:text-red-500"
@@ -1192,8 +1192,8 @@ export default function AdminDashboard() {
                   </Table>
                   {leagueTypesList.length === 0 && !loading && (
                     <div className="py-20 text-center">
-                       <AlertCircle className="w-8 h-8 text-neutral-700 mx-auto mb-3" />
-                       <p className="text-[10px] font-black uppercase italic tracking-widest text-neutral-500">No league types configured.</p>
+                      <AlertCircle className="w-8 h-8 text-neutral-700 mx-auto mb-3" />
+                      <p className="text-[10px] font-black uppercase italic tracking-widest text-neutral-500">No league types configured.</p>
                     </div>
                   )}
                 </CardContent>
@@ -1206,11 +1206,11 @@ export default function AdminDashboard() {
                 <div className="relative z-10 space-y-8">
                   <div className="flex items-center justify-between border-b border-white/5 pb-8">
                     <div className="space-y-2">
-                       <Badge className="bg-red-600/10 text-red-600 border-none font-black italic uppercase tracking-widest text-[10px]">Template Info</Badge>
-                       <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">{selectedLeagueType.name}</h3>
+                      <Badge className="bg-red-600/10 text-red-600 border-none font-black italic uppercase tracking-widest text-[10px]">Template Info</Badge>
+                      <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">{selectedLeagueType.name}</h3>
                     </div>
                     <Button variant="ghost" onClick={() => setSelectedLeagueType(null)} className="text-neutral-400 hover:text-red-500 h-10 px-4 font-black uppercase italic tracking-widest text-[10px]">
-                       ← Back to List
+                      ← Back to List
                     </Button>
                   </div>
 
@@ -1227,7 +1227,7 @@ export default function AdminDashboard() {
                       <div key={idx} className="bg-neutral-950 p-4 rounded-xl border border-white/5 flex items-center justify-between">
                         <span className="text-[9px] font-black uppercase tracking-tight text-neutral-500 italic">{config.label}</span>
                         <Badge className={cn("border-none text-[8px] font-black uppercase italic", config.val ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500")}>
-                           {config.val ? "YES" : "NO"}
+                          {config.val ? "YES" : "NO"}
                         </Badge>
                       </div>
                     ))}
@@ -1250,129 +1250,129 @@ export default function AdminDashboard() {
 
             {leagueSubTab === "types" && (
               <Card className="bg-neutral-900/40 border border-white/5 rounded-[3rem] p-10 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 blur-[80px] pointer-events-none" />
-                 <div className="relative z-10 space-y-8">
-                    <div className="border-b border-white/5 pb-6">
-                       <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">
-                         {editingLeagueType ? "Edit League Template" : "New League Template"}
-                       </h3>
-                       <p className="text-neutral-500 text-[10px] font-medium italic mt-1">Set the rules for new leagues</p>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 blur-[80px] pointer-events-none" />
+                <div className="relative z-10 space-y-8">
+                  <div className="border-b border-white/5 pb-6">
+                    <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">
+                      {editingLeagueType ? "Edit League Template" : "New League Template"}
+                    </h3>
+                    <p className="text-neutral-500 text-[10px] font-medium italic mt-1">Set the rules for new leagues</p>
+                  </div>
+
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    setLoading(true);
+                    try {
+                      const payload = {
+                        name: leagueTypeName,
+                        requireLeagueCode: requireCode,
+                        isSearchable,
+                        allowUserLeave: allowLeave,
+                        allowRenaming: allowRename,
+                        allowAdminDelete: allowDelete,
+                        allowMemberRemoval,
+                        creatorRole,
+                        hasMatchRange,
+                        defaultMaxMembers: maxMembers,
+                        maxLeaguesPerUser: maxLeagues
+                      };
+
+                      if (editingLeagueType) {
+                        await api.put(`/admin/api/adminleaguetype/${editingLeagueType.id}`, payload);
+                        alert("League Type Updated Successfully!");
+                      } else {
+                        await api.post("/admin/api/adminleaguetype/create", payload);
+                        alert("League Type Created Successfully!");
+                      }
+
+                      setEditingLeagueType(null);
+                      setLeagueTypeName("");
+                      setLeagueSubTab("list");
+                      fetchLeagueTypes();
+                    } catch (error) {
+                      alert(`Failed to ${editingLeagueType ? 'update' : 'create'} league type`);
+                    } finally {
+                      setLoading(false);
+                    }
+                  }} className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Template Name</Label>
+                        <Input
+                          value={leagueTypeName}
+                          onChange={(e) => setLeagueTypeName(e.target.value)}
+                          required
+                          placeholder="e.g. OFFICIAL CHAMPIONSHIP"
+                          className="bg-neutral-950 border-white/5 h-12 rounded-xl text-white font-bold italic"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Creator Role</Label>
+                        <select
+                          value={creatorRole}
+                          onChange={(e) => setCreatorRole(e.target.value)}
+                          className="w-full bg-neutral-950 border border-white/5 h-12 rounded-xl px-4 text-white text-sm font-bold italic outline-none focus:border-red-600 transition-all appearance-none"
+                        >
+                          <option value="ADMIN">ADMIN</option>
+                          <option value="USER">USER</option>
+                        </select>
+                      </div>
                     </div>
 
-                    <form onSubmit={async (e) => {
-                      e.preventDefault();
-                      setLoading(true);
-                      try {
-                        const payload = {
-                          name: leagueTypeName,
-                          requireLeagueCode: requireCode,
-                          isSearchable,
-                          allowUserLeave: allowLeave,
-                          allowRenaming: allowRename,
-                          allowAdminDelete: allowDelete,
-                          allowMemberRemoval,
-                          creatorRole,
-                          hasMatchRange,
-                          defaultMaxMembers: maxMembers,
-                          maxLeaguesPerUser: maxLeagues
-                        };
-                        
-                        if (editingLeagueType) {
-                          await api.put(`/admin/api/adminleaguetype/${editingLeagueType.id}`, payload);
-                          alert("League Type Updated Successfully!");
-                        } else {
-                          await api.post("/admin/api/adminleaguetype/create", payload);
-                          alert("League Type Created Successfully!");
-                        }
-                        
-                        setEditingLeagueType(null);
-                        setLeagueTypeName("");
-                        setLeagueSubTab("list");
-                        fetchLeagueTypes();
-                      } catch (error) {
-                        alert(`Failed to ${editingLeagueType ? 'update' : 'create'} league type`);
-                      } finally {
-                        setLoading(false);
-                      }
-                    }} className="space-y-8">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Template Name</Label>
-                          <Input 
-                            value={leagueTypeName} 
-                            onChange={(e) => setLeagueTypeName(e.target.value)} 
-                            required 
-                            placeholder="e.g. OFFICIAL CHAMPIONSHIP" 
-                            className="bg-neutral-950 border-white/5 h-12 rounded-xl text-white font-bold italic" 
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      {[
+                        { label: "Require Code", state: requireCode, setter: setRequireCode },
+                        { label: "Searchable", state: isSearchable, setter: setIsSearchable },
+                        { label: "Allow Leave", state: allowLeave, setter: setAllowLeave },
+                        { label: "Allow Rename", state: allowRename, setter: setAllowRename },
+                        { label: "Admin Delete", state: allowDelete, setter: setAllowDelete },
+                        { label: "Member Removal", state: allowMemberRemoval, setter: setAllowMemberRemoval },
+                        { label: "Match Range", state: hasMatchRange, setter: setHasMatchRange },
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-4 bg-neutral-950 rounded-xl border border-white/5 group hover:border-red-600/30 transition-all">
+                          <span className="text-[10px] font-black uppercase tracking-tight text-neutral-400 italic group-hover:text-white">{item.label}</span>
+                          <input
+                            type="checkbox"
+                            checked={item.state}
+                            onChange={(e) => item.setter(e.target.checked)}
+                            className="w-5 h-5 rounded-md bg-neutral-900 border-white/10 checked:bg-red-600 accent-red-600 cursor-pointer"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Creator Role</Label>
-                          <select 
-                            value={creatorRole} 
-                            onChange={(e) => setCreatorRole(e.target.value)} 
-                            className="w-full bg-neutral-950 border border-white/5 h-12 rounded-xl px-4 text-white text-sm font-bold italic outline-none focus:border-red-600 transition-all appearance-none"
-                          >
-                            <option value="ADMIN">ADMIN</option>
-                            <option value="USER">USER</option>
-                          </select>
-                        </div>
-                      </div>
+                      ))}
+                    </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {[
-                          { label: "Require Code", state: requireCode, setter: setRequireCode },
-                          { label: "Searchable", state: isSearchable, setter: setIsSearchable },
-                          { label: "Allow Leave", state: allowLeave, setter: setAllowLeave },
-                          { label: "Allow Rename", state: allowRename, setter: setAllowRename },
-                          { label: "Admin Delete", state: allowDelete, setter: setAllowDelete },
-                          { label: "Member Removal", state: allowMemberRemoval, setter: setAllowMemberRemoval },
-                          { label: "Match Range", state: hasMatchRange, setter: setHasMatchRange },
-                        ].map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-4 bg-neutral-950 rounded-xl border border-white/5 group hover:border-red-600/30 transition-all">
-                             <span className="text-[10px] font-black uppercase tracking-tight text-neutral-400 italic group-hover:text-white">{item.label}</span>
-                             <input 
-                              type="checkbox" 
-                              checked={item.state} 
-                              onChange={(e) => item.setter(e.target.checked)} 
-                              className="w-5 h-5 rounded-md bg-neutral-900 border-white/10 checked:bg-red-600 accent-red-600 cursor-pointer"
-                             />
-                          </div>
-                        ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Default Max Members</Label>
+                        <Input
+                          type="number"
+                          value={maxMembers}
+                          onChange={(e) => setMaxMembers(Number(e.target.value))}
+                          className="bg-neutral-950 border-white/5 h-12 rounded-xl text-white font-mono font-bold"
+                        />
                       </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Max Leagues Per User</Label>
+                        <Input
+                          type="number"
+                          value={maxLeagues}
+                          onChange={(e) => setMaxLeagues(Number(e.target.value))}
+                          className="bg-neutral-950 border-white/5 h-12 rounded-xl text-white font-mono font-bold"
+                        />
+                      </div>
+                    </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Default Max Members</Label>
-                            <Input 
-                              type="number" 
-                              value={maxMembers} 
-                              onChange={(e) => setMaxMembers(Number(e.target.value))} 
-                              className="bg-neutral-950 border-white/5 h-12 rounded-xl text-white font-mono font-bold" 
-                            />
-                         </div>
-                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">Max Leagues Per User</Label>
-                            <Input 
-                              type="number" 
-                              value={maxLeagues} 
-                              onChange={(e) => setMaxLeagues(Number(e.target.value))} 
-                              className="bg-neutral-950 border-white/5 h-12 rounded-xl text-white font-mono font-bold" 
-                            />
-                         </div>
-                      </div>
-
-                      <div className="pt-6 border-t border-white/5 flex justify-end">
-                         <Button 
-                          type="submit" 
-                          disabled={loading} 
-                          className="bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-12 px-12 rounded-xl shadow-xl shadow-red-600/20 text-xs"
-                         >
-                           {loading ? "Saving..." : editingLeagueType ? "Update Template" : "Create Template"}
-                         </Button>
-                      </div>
-                    </form>
-                 </div>
+                    <div className="pt-6 border-t border-white/5 flex justify-end">
+                      <Button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-12 px-12 rounded-xl shadow-xl shadow-red-600/20 text-xs"
+                      >
+                        {loading ? "Saving..." : editingLeagueType ? "Update Template" : "Create Template"}
+                      </Button>
+                    </div>
+                  </form>
+                </div>
               </Card>
             )}
           </div>
@@ -1385,9 +1385,9 @@ export default function AdminDashboard() {
                 <p className="text-[10px] font-black uppercase tracking-[0.35em] text-red-600 italic mb-2">League Management</p>
                 <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">Admin <span className="text-red-600">Leagues</span></h1>
               </div>
-              
+
               <div className="flex bg-neutral-900/50 p-1 rounded-xl border border-white/5">
-                <button 
+                <button
                   onClick={() => { setAdminLeagueSubTab("list"); setSelectedAdminLeague(null); setEditingAdminLeague(null); }}
                   className={cn(
                     "px-6 py-2 rounded-lg text-[10px] font-black uppercase italic tracking-widest transition-all",
@@ -1396,10 +1396,10 @@ export default function AdminDashboard() {
                 >
                   All Leagues
                 </button>
-                <button 
-                  onClick={() => { 
-                    setAdminLeagueSubTab("setup"); 
-                    setSelectedAdminLeague(null); 
+                <button
+                  onClick={() => {
+                    setAdminLeagueSubTab("setup");
+                    setSelectedAdminLeague(null);
                     setEditingAdminLeague(null);
                     setAdminLeagueName("");
                     setAdminTemplateId(0);
@@ -1446,23 +1446,23 @@ export default function AdminDashboard() {
                               </TableCell>
                               <TableCell className="text-right pr-8 py-5">
                                 <div className="flex items-center justify-end gap-2">
-                                  <Button 
-                                    variant="ghost" 
+                                  <Button
+                                    variant="ghost"
                                     onClick={() => setSelectedAdminLeague(league)}
                                     className="h-8 px-4 font-black uppercase italic tracking-widest text-[9px] text-red-600 hover:text-white hover:bg-red-600 transition-all rounded-lg"
                                   >
                                     View
                                   </Button>
-                                  <Button 
-                                    variant="ghost" 
+                                  <Button
+                                    variant="ghost"
                                     size="icon"
                                     onClick={() => startEditAdminLeague(league)}
                                     className="h-8 w-8 text-neutral-400 hover:text-white"
                                   >
                                     <Edit3 className="w-4 h-4" />
                                   </Button>
-                                  <Button 
-                                    variant="ghost" 
+                                  <Button
+                                    variant="ghost"
                                     size="icon"
                                     onClick={() => handleDeleteAdminLeague(league.id)}
                                     className="h-8 w-8 text-neutral-400 hover:text-red-500"
@@ -1531,18 +1531,18 @@ export default function AdminDashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">League Name</Label>
-                            <Input 
-                              value={adminLeagueName} 
-                              onChange={(e) => setAdminLeagueName(e.target.value)} 
-                              required 
-                              placeholder="e.g. SILVERSTONE GP SPECIAL" 
-                              className="bg-neutral-950 border-white/5 h-12 rounded-xl text-white font-bold italic" 
+                            <Input
+                              value={adminLeagueName}
+                              onChange={(e) => setAdminLeagueName(e.target.value)}
+                              required
+                              placeholder="e.g. SILVERSTONE GP SPECIAL"
+                              className="bg-neutral-950 border-white/5 h-12 rounded-xl text-white font-bold italic"
                             />
                           </div>
                           <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-1">League Template</Label>
-                            <select 
-                              value={adminTemplateId} 
+                            <select
+                              value={adminTemplateId}
                               onChange={(e) => setAdminTemplateId(Number(e.target.value))}
                               required
                               className="w-full bg-neutral-950 border border-white/5 h-12 rounded-xl px-4 text-white text-sm font-bold italic outline-none focus:border-red-600 transition-all appearance-none"
@@ -1573,9 +1573,9 @@ export default function AdminDashboard() {
                         </div>
 
                         <div className="pt-6 border-t border-white/5 flex justify-end">
-                          <Button 
-                            type="submit" 
-                            disabled={loading} 
+                          <Button
+                            type="submit"
+                            disabled={loading}
                             className="bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-12 px-12 rounded-xl shadow-xl shadow-red-600/20 text-xs"
                           >
                             {loading ? "Saving..." : editingAdminLeague ? "Save Changes" : "Create League"}
@@ -1595,8 +1595,8 @@ export default function AdminDashboard() {
                       <Trophy className="w-8 h-8 text-red-600" />
                     </div>
                     <div>
-                       <Badge className="bg-red-600/10 text-red-600 border-none font-black italic uppercase tracking-widest text-[10px] mb-2">League Info</Badge>
-                       <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white leading-none">{selectedAdminLeague.leagueName}</h3>
+                      <Badge className="bg-red-600/10 text-red-600 border-none font-black italic uppercase tracking-widest text-[10px] mb-2">League Info</Badge>
+                      <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white leading-none">{selectedAdminLeague.leagueName}</h3>
                     </div>
                   </div>
 
@@ -1625,13 +1625,13 @@ export default function AdminDashboard() {
                       {selectedAdminLeague.template && Object.entries(selectedAdminLeague.template)
                         .filter(([_, v]) => typeof v === 'boolean')
                         .map(([key, val], idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-neutral-900/30 rounded-lg border border-white/5">
-                          <span className="text-[8px] font-black uppercase text-neutral-400 italic truncate mr-2">{key.replace(/([A-Z])/g, ' $1')}</span>
-                          <Badge className={cn("border-none text-[8px] font-black uppercase italic", val ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500")}>
-                            {val ? "YES" : "NO"}
-                          </Badge>
-                        </div>
-                      ))}
+                          <div key={idx} className="flex items-center justify-between p-3 bg-neutral-900/30 rounded-lg border border-white/5">
+                            <span className="text-[8px] font-black uppercase text-neutral-400 italic truncate mr-2">{key.replace(/([A-Z])/g, ' $1')}</span>
+                            <Badge className={cn("border-none text-[8px] font-black uppercase italic", val ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500")}>
+                              {val ? "YES" : "NO"}
+                            </Badge>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 </div>
@@ -1644,82 +1644,82 @@ export default function AdminDashboard() {
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.35em] text-red-600 italic mb-2">Points Runner</p>
-               <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">Match <span className="text-red-600">Standings</span></h1>
+              <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">Match <span className="text-red-600">Standings</span></h1>
             </div>
 
             <Card className="bg-neutral-900/40 border border-white/5 p-12 rounded-[3rem] relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/5 blur-[100px] pointer-events-none" />
-               <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="w-24 h-24 bg-red-600/10 rounded-[2rem] flex items-center justify-center mx-auto border border-red-600/20 shadow-2xl shadow-red-600/10 group">
-                       <Calculator className="w-10 h-10 text-red-600 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">Points <span className="text-red-600">Calculation</span></h2>
-                      <p className="text-neutral-500 text-[10px] font-medium italic">Update leaderboard and standings for the selected match</p>
-                    </div>
+              <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/5 blur-[100px] pointer-events-none" />
+              <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-24 h-24 bg-red-600/10 rounded-[2rem] flex items-center justify-center mx-auto border border-red-600/20 shadow-2xl shadow-red-600/10 group">
+                    <Calculator className="w-10 h-10 text-red-600 group-hover:scale-110 transition-transform" />
                   </div>
-                  <div className="space-y-4">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.35em] text-neutral-400 italic">Select Match</Label>
-                    <div className="relative group">
-                      <select 
-                        value={viewMatchId} 
-                        onChange={(e) => setViewMatchId(Number(e.target.value))} 
-                        className="w-full bg-neutral-950 border border-white/5 h-12 rounded-xl px-4 text-sm font-black uppercase italic tracking-tight text-white outline-none focus:border-red-600 transition-all text-center appearance-none cursor-pointer hover:bg-neutral-900 shadow-inner"
-                      >
-                        <option value={0}>— SELECT MATCH —</option>
-                        {matches.map(m => (
-                          <option key={m.matchId} value={m.matchId}>
-                             {m.circuitLocation} [RD {m.gamedayId}]
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-700 group-hover:text-red-600 transition-colors pointer-events-none rotate-90" />
-                    </div>
-                    {viewMatchId > 0 && (
-                      <div className="flex justify-center mt-2">
-                        <Badge className="bg-neutral-950 border-white/10 text-neutral-400 font-black italic uppercase tracking-widest text-[9px] px-4 h-8 flex items-center gap-2">
-                          Status: <span className="text-red-600">{getStatusLabel(matches.find(m => m.matchId === viewMatchId)?.status || 0)}</span>
-                        </Badge>
-                      </div>
-                    )}
+                  <div>
+                    <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">Points <span className="text-red-600">Calculation</span></h2>
+                    <p className="text-neutral-500 text-[10px] font-medium italic">Update leaderboard and standings for the selected match</p>
                   </div>
-
+                </div>
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.35em] text-neutral-400 italic">Select Match</Label>
+                  <div className="relative group">
+                    <select
+                      value={viewMatchId}
+                      onChange={(e) => setViewMatchId(Number(e.target.value))}
+                      className="w-full bg-neutral-950 border border-white/5 h-12 rounded-xl px-4 text-sm font-black uppercase italic tracking-tight text-white outline-none focus:border-red-600 transition-all text-center appearance-none cursor-pointer hover:bg-neutral-900 shadow-inner"
+                    >
+                      <option value={0}>— SELECT MATCH —</option>
+                      {matches.map(m => (
+                        <option key={m.matchId} value={m.matchId}>
+                          {m.circuitLocation} [RD {m.gamedayId}]
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-700 group-hover:text-red-600 transition-colors pointer-events-none rotate-90" />
+                  </div>
                   {viewMatchId > 0 && (
-                    <div className="pt-8 space-y-8 animate-in zoom-in-95 duration-500">
-                      {matches.find(m => m.matchId === viewMatchId)?.status === 4 && (
-                        <div className="bg-green-500/10 border border-green-500/20 p-6 rounded-2xl flex items-center justify-center gap-3">
-                          <CheckCircle2 className="w-5 h-5 text-green-500" />
-                          <span className="text-sm font-black uppercase italic tracking-widest text-green-500">Points already calculated for this match</span>
-                        </div>
-                      )}
-
-                      <Button
-                        onClick={async () => {
-                          if (!confirm("Are you sure you want to run points calculation for this match? This cannot be undone easily.")) return;
-                          try {
-                            setLoading(true);
-                            console.log("Sending Points Calculation Request:", { matchId: viewMatchId });
-                            const response = await api.post(`/admin/api/pointscalculation/pc`, { matchId: viewMatchId });
-                            console.log("Points Calculation Success:", response.data);
-                            alert("Points Calculated Successfully!");
-                            setMatches(matches.map(match => match.matchId === viewMatchId ? { ...match, status: 4 } : match));
-                          } catch (error: any) {
-                            console.error("Points Calculation Error Details:", error.response?.data || error);
-                            const msg = error.response?.data?.message || error.message || "Failed to calculate points";
-                            alert(`Error: ${msg}`);
-                          } finally {
-                            setLoading(false);
-                          }
-                        }}
-                        disabled={loading}
-                        className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl shadow-lg shadow-red-600/10 text-sm"
-                      >
-                        {loading ? "Processing..." : "Run Points Calculation"}
-                      </Button>
+                    <div className="flex justify-center mt-2">
+                      <Badge className="bg-neutral-950 border-white/10 text-neutral-400 font-black italic uppercase tracking-widest text-[9px] px-4 h-8 flex items-center gap-2">
+                        Status: <span className="text-red-600">{getStatusLabel(matches.find(m => m.matchId === viewMatchId)?.status || 0)}</span>
+                      </Badge>
                     </div>
                   )}
-               </div>
+                </div>
+
+                {viewMatchId > 0 && (
+                  <div className="pt-8 space-y-8 animate-in zoom-in-95 duration-500">
+                    {matches.find(m => m.matchId === viewMatchId)?.status === 4 && (
+                      <div className="bg-green-500/10 border border-green-500/20 p-6 rounded-2xl flex items-center justify-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500" />
+                        <span className="text-sm font-black uppercase italic tracking-widest text-green-500">Points already calculated for this match</span>
+                      </div>
+                    )}
+
+                    <Button
+                      onClick={async () => {
+                        if (!confirm("Are you sure you want to run points calculation for this match? This cannot be undone easily.")) return;
+                        try {
+                          setLoading(true);
+                          console.log("Sending Points Calculation Request:", { matchId: viewMatchId });
+                          const response = await api.post(`/admin/api/pointscalculation/pc`, { matchId: viewMatchId });
+                          console.log("Points Calculation Success:", response.data);
+                          alert("Points Calculated Successfully!");
+                          setMatches(matches.map(match => match.matchId === viewMatchId ? { ...match, status: 4 } : match));
+                        } catch (error: any) {
+                          console.error("Points Calculation Error Details:", error.response?.data || error);
+                          const msg = error.response?.data?.message || error.message || "Failed to calculate points";
+                          alert(`Error: ${msg}`);
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      disabled={loading}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl shadow-lg shadow-red-600/10 text-sm"
+                    >
+                      {loading ? "Processing..." : "Run Points Calculation"}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </Card>
           </div>
         )}
@@ -1731,36 +1731,36 @@ export default function AdminDashboard() {
           <div className="absolute inset-0 bg-neutral-950/90 backdrop-blur-md" onClick={() => setShowDriverSelector(false)} />
           <Card className="relative bg-neutral-900 border border-white/10 rounded-[3rem] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
             <CardHeader className="bg-neutral-950 p-8 border-b border-white/5 flex flex-row items-center justify-between">
-               <div className="flex items-center gap-4">
-                 <CardTitle className="text-2xl font-black italic uppercase tracking-tighter text-white">Driver <span className="text-red-600">Selection</span></CardTitle>
-                 <Button variant="outline" size="sm" onClick={toggleSelectAllDrivers} className="bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest text-[9px] h-8 px-3">
-                   {selectedDriverIds.length === players.filter(p => !options.some(opt => opt.optionDesc === p.playerName)).length && selectedDriverIds.length > 0 ? "Deselect All" : "Select All"}
-                 </Button>
-               </div>
-               <Button variant="outline" size="icon" onClick={() => setShowDriverSelector(false)} className="rounded-full bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white"><X className="w-6 h-6" /></Button>
+              <div className="flex items-center gap-4">
+                <CardTitle className="text-2xl font-black italic uppercase tracking-tighter text-white">Driver <span className="text-red-600">Selection</span></CardTitle>
+                <Button variant="outline" size="sm" onClick={toggleSelectAllDrivers} className="bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest text-[9px] h-8 px-3">
+                  {selectedDriverIds.length === players.filter(p => !options.some(opt => opt.optionDesc === p.playerName)).length && selectedDriverIds.length > 0 ? "Deselect All" : "Select All"}
+                </Button>
+              </div>
+              <Button variant="outline" size="icon" onClick={() => setShowDriverSelector(false)} className="rounded-full bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white"><X className="w-6 h-6" /></Button>
             </CardHeader>
             <CardContent className="p-8 overflow-y-auto flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {players.filter(p => !options.some(opt => opt.optionDesc === p.playerName)).map(p => (
-                   <div 
-                    key={p.playerId} 
+                  <div
+                    key={p.playerId}
                     onClick={() => handleDriverToggle(p.playerId)}
                     className={cn(
                       "p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between group",
                       selectedDriverIds.includes(p.playerId) ? "bg-red-600 border-red-600 shadow-lg shadow-red-600/20" : "bg-neutral-950 border-white/5 hover:border-red-600/50"
                     )}
-                   >
-                     <span className={cn("font-black italic uppercase text-sm", selectedDriverIds.includes(p.playerId) ? "text-white" : "text-neutral-300 group-hover:text-white")}>
-                       {p.playerName}
-                     </span>
-                     {selectedDriverIds.includes(p.playerId) && <Check className="w-4 h-4 text-white" />}
-                   </div>
+                  >
+                    <span className={cn("font-black italic uppercase text-sm", selectedDriverIds.includes(p.playerId) ? "text-white" : "text-neutral-300 group-hover:text-white")}>
+                      {p.playerName}
+                    </span>
+                    {selectedDriverIds.includes(p.playerId) && <Check className="w-4 h-4 text-white" />}
+                  </div>
                 ))}
               </div>
             </CardContent>
             <div className="p-8 bg-neutral-950 border-t border-white/5 flex gap-4">
-               <Button onClick={handleAddSelectedDrivers} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl shadow-lg">Confirm Selection</Button>
-               <Button variant="outline" onClick={() => setShowDriverSelector(false)} className="flex-1 bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl">Cancel</Button>
+              <Button onClick={handleAddSelectedDrivers} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl shadow-lg">Confirm Selection</Button>
+              <Button variant="outline" onClick={() => setShowDriverSelector(false)} className="flex-1 bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl">Cancel</Button>
             </div>
           </Card>
         </div>
@@ -1771,36 +1771,36 @@ export default function AdminDashboard() {
           <div className="absolute inset-0 bg-neutral-950/90 backdrop-blur-md" onClick={() => setShowTeamSelector(false)} />
           <Card className="relative bg-neutral-900 border border-white/10 rounded-[3rem] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
             <CardHeader className="bg-neutral-950 p-8 border-b border-white/5 flex flex-row items-center justify-between">
-               <div className="flex items-center gap-4">
-                 <CardTitle className="text-2xl font-black italic uppercase tracking-tighter text-white">Team <span className="text-red-600">Selection</span></CardTitle>
-                 <Button variant="outline" size="sm" onClick={toggleSelectAllTeams} className="bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest text-[9px] h-8 px-3">
-                   {selectedTeamIds.length === teams.filter(t => !options.some(opt => opt.optionDesc === t.teamName)).length && selectedTeamIds.length > 0 ? "Deselect All" : "Select All"}
-                 </Button>
-               </div>
-               <Button variant="outline" size="icon" onClick={() => setShowTeamSelector(false)} className="rounded-full bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white"><X className="w-6 h-6" /></Button>
+              <div className="flex items-center gap-4">
+                <CardTitle className="text-2xl font-black italic uppercase tracking-tighter text-white">Team <span className="text-red-600">Selection</span></CardTitle>
+                <Button variant="outline" size="sm" onClick={toggleSelectAllTeams} className="bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest text-[9px] h-8 px-3">
+                  {selectedTeamIds.length === teams.filter(t => !options.some(opt => opt.optionDesc === t.teamName)).length && selectedTeamIds.length > 0 ? "Deselect All" : "Select All"}
+                </Button>
+              </div>
+              <Button variant="outline" size="icon" onClick={() => setShowTeamSelector(false)} className="rounded-full bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white"><X className="w-6 h-6" /></Button>
             </CardHeader>
             <CardContent className="p-8 overflow-y-auto flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {teams.filter(t => !options.some(opt => opt.optionDesc === t.teamName)).map(t => (
-                   <div 
-                    key={t.teamId} 
+                  <div
+                    key={t.teamId}
                     onClick={() => handleTeamToggle(t.teamId)}
                     className={cn(
                       "p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between group",
                       selectedTeamIds.includes(t.teamId) ? "bg-red-600 border-red-600 shadow-lg shadow-red-600/20" : "bg-neutral-950 border-white/5 hover:border-red-600/50"
                     )}
-                   >
-                     <span className={cn("font-black italic uppercase text-sm", selectedTeamIds.includes(t.teamId) ? "text-white" : "text-neutral-300 group-hover:text-white")}>
-                       {t.teamName}
-                     </span>
-                     {selectedTeamIds.includes(t.teamId) && <Check className="w-4 h-4 text-white" />}
-                   </div>
+                  >
+                    <span className={cn("font-black italic uppercase text-sm", selectedTeamIds.includes(t.teamId) ? "text-white" : "text-neutral-300 group-hover:text-white")}>
+                      {t.teamName}
+                    </span>
+                    {selectedTeamIds.includes(t.teamId) && <Check className="w-4 h-4 text-white" />}
+                  </div>
                 ))}
               </div>
             </CardContent>
             <div className="p-8 bg-neutral-950 border-t border-white/5 flex gap-4">
-               <Button onClick={handleAddSelectedTeams} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl shadow-lg">Confirm Selection</Button>
-               <Button variant="outline" onClick={() => setShowTeamSelector(false)} className="flex-1 bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl">Cancel</Button>
+              <Button onClick={handleAddSelectedTeams} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl shadow-lg">Confirm Selection</Button>
+              <Button variant="outline" onClick={() => setShowTeamSelector(false)} className="flex-1 bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-white font-black uppercase italic tracking-widest h-14 rounded-xl">Cancel</Button>
             </div>
           </Card>
         </div>

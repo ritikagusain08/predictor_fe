@@ -36,7 +36,7 @@ function App() {
         <Route path="/leagues" element={<Leagues />} />
         <Route path="/league/:leagueCode" element={<LeagueDetails />} />
         <Route path="/league/season-leaderboard/:leagueId" element={<LeagueLeaderboard />} />
-      </Routes> 
+      </Routes>
     </BrowserRouter>
   );
 }
