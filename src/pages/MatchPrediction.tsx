@@ -185,14 +185,14 @@ export default function MatchPrediction() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-[9px] font-bold uppercase text-neutral-500 italic tracking-widest">{match?.circuitLocation}</span>
-            <Button variant="ghost" size="sm" className="text-white hover:text-white hover:text-white font-bold h-7 text-[10px]" onClick={() => navigate("/dashboard")}>
-              Exit
+            <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white hover:bg-neutral-800 font-bold h-7 text-[10px] flex items-center gap-1" onClick={() => navigate("/dashboard")}>
+              <ChevronLeft className="w-3.5 h-3.5" /> Back
             </Button>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-xl mx-auto px-4 pt-8 relative z-10">
+      <div className="max-w-xl mx-auto px-4 pt-8 relative z-10 font-outfit">
         
         {/* 🔹 PROGRESS */}
         <div className="flex justify-between items-end mb-6 px-1">
@@ -229,39 +229,75 @@ export default function MatchPrediction() {
 
           <CardContent className="px-8 pb-4 pt-2">
             <div className="grid grid-cols-1 gap-2.5">
-              {currentQuestion.options.map((opt: any) => {
-                const isActive = selected.includes(opt.optionId);
-                return (
-                  <div 
-                    key={opt.optionId} 
-                    onClick={() => handleSelect(currentQuestion.id, opt.optionId)}
-                    className={cn(
-                      "p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between group",
-                      isActive 
-                        ? "bg-red-600/5 border-red-600" 
-                        : "bg-neutral-950/40 border-white/5 hover:border-white/10"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                       <div className={cn(
-                         "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all",
-                         isActive ? "border-red-600 bg-red-600" : "border-neutral-800"
-                       )}>
-                          {isActive && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
-                       </div>
-                       <span className={cn("font-bold text-base transition-all italic uppercase tracking-tight", isActive ? "text-white" : "text-neutral-400 group-hover:text-white")}>
-                         {opt.optionDesc}
-                       </span>
+              {(() => {
+                const isPodium = currentQuestion?.questionType?.toUpperCase().includes("PODIUM");
+                const selected = answers[currentQuestion.id] || [];
+
+                return currentQuestion.options.map((opt: any) => {
+                  const isActive = selected.includes(opt.optionId);
+                  const posIndex = selected.indexOf(opt.optionId);
+
+                  let borderActiveStyle = "bg-red-600/5 border-red-600";
+                  if (isPodium && isActive) {
+                    if (posIndex === 0) borderActiveStyle = "bg-yellow-500/[0.03] border-yellow-500/60 shadow-[0_0_12px_rgba(234,179,8,0.15)]";
+                    else if (posIndex === 1) borderActiveStyle = "bg-neutral-300/[0.03] border-neutral-300/60 shadow-[0_0_12px_rgba(203,213,225,0.15)]";
+                    else borderActiveStyle = "bg-amber-600/[0.03] border-amber-600/60 shadow-[0_0_12px_rgba(217,119,6,0.15)]";
+                  }
+
+                  return (
+                    <div 
+                      key={opt.optionId} 
+                      onClick={() => handleSelect(currentQuestion.id, opt.optionId)}
+                      className={cn(
+                        "p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between group",
+                        isActive 
+                          ? borderActiveStyle 
+                          : "bg-neutral-950/40 border-white/5 hover:border-white/10"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                         {isPodium ? (
+                           isActive ? (
+                             posIndex === 0 ? (
+                               <div className="bg-yellow-500 text-black font-black italic text-[10px] tracking-tighter px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(234,179,8,0.4)] border border-yellow-400/50 shrink-0">
+                                 P1
+                               </div>
+                             ) : posIndex === 1 ? (
+                               <div className="bg-neutral-300 text-black font-black italic text-[10px] tracking-tighter px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(203,213,225,0.4)] border border-white/50 shrink-0">
+                                 P2
+                               </div>
+                             ) : (
+                               <div className="bg-amber-600 text-white font-black italic text-[10px] tracking-tighter px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(217,119,6,0.4)] border border-amber-500/50 shrink-0">
+                                 P3
+                               </div>
+                             )
+                           ) : (
+                             <div className="w-5 h-5 rounded border border-neutral-800 flex items-center justify-center text-[8px] font-black text-neutral-600 italic shrink-0 bg-neutral-950/50">
+                               -
+                             </div>
+                           )
+                         ) : (
+                           <div className={cn(
+                             "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
+                             isActive ? "border-red-600 bg-red-600" : "border-neutral-800"
+                           )}>
+                              {isActive && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
+                           </div>
+                         )}
+                         <span className={cn("font-bold text-base transition-all italic uppercase tracking-tight", isActive ? "text-white" : "text-neutral-400 group-hover:text-white")}>
+                           {opt.optionDesc}
+                         </span>
+                      </div>
+                      <div className={cn(
+                        "font-mono text-[9px] font-black italic uppercase tracking-widest px-2 py-0.5 rounded-sm",
+                        isActive ? "bg-red-600 text-white" : "bg-neutral-900 text-neutral-600"
+                      )}>
+                        +{opt.points || 10}
+                      </div>
                     </div>
-                    <div className={cn(
-                      "font-mono text-[9px] font-black italic uppercase tracking-widest px-2 py-0.5 rounded-sm",
-                      isActive ? "bg-red-600 text-white" : "bg-neutral-900 text-neutral-600"
-                    )}>
-                      +{opt.points || 10}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
 
             {/* 🔹 EXCLUSIVE NEON BOOSTER PILL */}

@@ -23,7 +23,8 @@ import {
   UserMinus,
   Edit3,
   Check,
-  Trash2
+  Trash2,
+  Copy
 } from "lucide-react";
 import { 
   Select, 
@@ -62,6 +63,7 @@ interface LeagueMember {
 interface LeagueInfo {
   id: number;
   leagueName: string;
+  leagueCode?: string;
   membersCount: number;
   template?: {
     name: string;
@@ -89,6 +91,16 @@ export default function LeagueLeaderboard() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [newLeagueName, setNewLeagueName] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Copy Code State
+  const [copied, setCopied] = useState(false);
+  const copyCode = () => {
+    if (leagueInfo?.leagueCode) {
+      navigator.clipboard.writeText(leagueInfo.leagueCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const navigate = useNavigate();
   const currentUserId = localStorage.getItem("userId");
@@ -475,6 +487,23 @@ export default function LeagueLeaderboard() {
                        <p className="text-[9px] font-black uppercase tracking-widest text-neutral-600 mb-1">Race Type</p>
                        <p className="text-sm font-black uppercase italic text-white">{leagueInfo?.template?.name || "Standard"}</p>
                     </div>
+                    {leagueInfo?.leagueCode && (
+                      <div>
+                         <p className="text-[9px] font-black uppercase tracking-widest text-neutral-600 mb-1">League Invite Code</p>
+                         <div className="flex items-center gap-2 mt-1.5">
+                            <code className="text-base font-mono font-black text-red-500 bg-neutral-950 px-3 py-1 rounded border border-white/5 tracking-wider">{leagueInfo.leagueCode}</code>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={copyCode}
+                              className="h-8 hover:bg-neutral-800 text-white hover:text-white px-2.5 rounded-lg flex items-center gap-1.5"
+                            >
+                              {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5 text-neutral-400" />}
+                              <span className="text-[9px] uppercase font-black tracking-widest">{copied ? "Copied!" : "Copy"}</span>
+                            </Button>
+                         </div>
+                      </div>
+                    )}
                     <Separator className="bg-white/5 my-4" />
                     <div>
                        <p className="text-[9px] font-black uppercase tracking-widest text-neutral-600 mb-1">League Authority</p>

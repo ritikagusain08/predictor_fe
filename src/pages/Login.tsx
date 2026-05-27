@@ -5,13 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Mail, Lock, AlertCircle } from "lucide-react";
+import { Trophy, Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Forgot Password States
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +51,15 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleForgotSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setTimeout(() => {
+      setForgotSuccess(true);
+      setForgotLoading(false);
+    }, 1500);
   };
 
   return (
@@ -96,7 +112,13 @@ export default function Login() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-neutral-300">Password</Label>
-                  <button type="button" className="text-xs text-red-500 hover:underline">Forgot?</button>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowForgotModal(true)} 
+                    className="text-xs text-red-500 hover:underline font-bold transition-all"
+                  >
+                    Forgot?
+                  </button>
                 </div>
                 <div className="relative group">
                   <Lock className="absolute left-3 top-3 w-4 h-4 text-white hover:text-white group-focus-within:text-red-500 transition-colors" />
@@ -128,6 +150,68 @@ export default function Login() {
           </form>
         </Card>
       </div>
+
+      {/* Forgot Password Modal */}
+      <Dialog open={showForgotModal} onOpenChange={(open) => { setShowForgotModal(open); if(!open) { setForgotSuccess(false); setForgotEmail(""); } }}>
+        <DialogContent className="bg-neutral-900 border-neutral-800 text-white p-8 rounded-[2rem] max-w-md font-outfit">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-2xl font-black italic uppercase">Reset Password</DialogTitle>
+            <DialogDescription className="text-neutral-400 text-sm">
+              {!forgotSuccess 
+                ? "Enter your email address to receive a password reset link." 
+                : "Reset instructions have been dispatched!"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {!forgotSuccess ? (
+            <form onSubmit={handleForgotSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email" className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Email Address</Label>
+                <div className="relative group">
+                  <Mail className="absolute left-3 top-3.5 w-4 h-4 text-neutral-500 group-focus-within:text-red-500 transition-colors" />
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="example@gmail.com"
+                    className="bg-neutral-950 border-neutral-800 h-12 pl-10 text-white focus:border-red-600 transition-colors rounded-lg text-sm"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <DialogFooter className="pt-2">
+                <Button 
+                  type="submit" 
+                  className="bg-red-600 hover:bg-red-700 w-full h-12 font-black uppercase italic tracking-widest text-white shadow-lg shadow-red-600/20 text-sm rounded-xl"
+                  disabled={forgotLoading}
+                >
+                  {forgotLoading ? "Sending Code..." : "Send Reset Link"}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <div className="flex flex-col items-center text-center space-y-4 py-4 animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-16 h-16 bg-green-500/10 rounded-2xl flex items-center justify-center border border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
+                 <CheckCircle2 className="w-8 h-8 text-green-500 animate-bounce" />
+              </div>
+              <div className="space-y-1">
+                 <h3 className="text-lg font-black uppercase italic tracking-tight text-white">Link Dispatched</h3>
+                 <p className="text-xs text-neutral-400 leading-relaxed font-bold italic uppercase tracking-wider">
+                   A temporary reset link was sent to <span className="text-red-500">{forgotEmail}</span>. 
+                   <br/>In this sandbox paddock, you can also modify all user passwords directly in your Admin Console database.
+                 </p>
+              </div>
+              <Button 
+                onClick={() => { setShowForgotModal(false); setForgotSuccess(false); setForgotEmail(""); }}
+                className="w-full bg-neutral-950 border border-white/5 hover:bg-neutral-900 text-white h-12 rounded-xl text-xs font-black uppercase italic tracking-widest"
+              >
+                Back to Login
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
